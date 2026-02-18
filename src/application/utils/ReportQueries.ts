@@ -1,0 +1,458 @@
+/**
+ * Funciones de consulta sobre un AggregatedReport.
+ *
+ * Toda la logica de filtrado, ordenamiento, paginacion y agrupacion
+ * vive aqui, desacoplada de la capa de transporte (tRPC, CLI, etc.).
+ */
+import type {
+  AggregatedReport,
+  GlobalSummary,
+  CategorySummary,
+  ProductSummary,
+  AggregatedTestCase,
+  TestExecution,
+} from '../../domain/entities/index.js';
+
+// ── Shared result types ─────────────────────────────────────────
+
+/** Envoltorio generico para respuestas paginadas. */
+export interface PaginatedResult<T> {
+  items: T[];
+  total: number;
+  limit: number;
+  offset: number;
+  hasMore: boolean;
+}
+
+/** Agrupacion de fallos por mensaje de error, con conteo y tests/productos afectados. */
+export interface FailureGroup {
+  message: string;
+  occurrences: number;
+  affectedTests: string[];
+  affectedProducts: string[];
+}
+
+/** Detalle de un producto con sus test cases relacionados. */
+export type ProductDetailResult = ProductSummary & {
+  relatedTestCases: AggregatedTestCase[];
+};
+
+// ── Filter param interfaces ─────────────────────────────────────
+
+interface DateRange {
+  from?: string;
+  to?: string;
+}
+
+interface SortConfig {
+  field: string;
+  direction: 'asc' | 'desc';
+}
+
+interface PaginationConfig {
+  limit?: number;
+  offset?: number;
+}
+
+export interface GlobalSummaryFilters {
+  dateRange?: DateRange;
+}
+
+export interface CategoriesFilters {
+  category?: string;
+  sortBy?: SortConfig;
+}
+
+export interface ProductsFilters {
+  category?: string;
+  minPassRate?: number;
+  maxPassRate?: number;
+  dateRange?: DateRange;
+  search?: string;
+  pagination?: PaginationConfig;
+  sortBy?: SortConfig;
+}
+
+export interface TestCasesFilters {
+  statusType?: 'flaky' | 'always-passing' | 'always-failing' | 'all';
+  product?: string;
+  minPassRate?: number;
+  maxPassRate?: number;
+  search?: string;
+  pagination?: PaginationConfig;
+  sortBy?: SortConfig;
+}
+
+export interface ExecutionsFilters {
+  category?: string;
+  product?: string;
+  dateRange?: DateRange;
+  pagination?: PaginationConfig;
+  sortBy?: SortConfig;
+}
+
+export interface FlakyTestsFilters {
+  minPassRate?: number;
+  maxPassRate?: number;
+  minExecutions?: number;
+  pagination?: PaginationConfig;
+  sortBy?: SortConfig;
+}
+
+export interface SlowestTestsFilters {
+  topN?: number;
+  metric?: 'avgTime' | 'maxTime' | 'totalTime';
+}
+
+export interface FailureAnalysisFilters {
+  minOccurrences?: number;
+  product?: string;
+  search?: string;
+  pagination?: PaginationConfig;
+}
+
+// ── Internal helpers ────────────────────────────────────────────
+
+/** Aplica paginacion sobre un array ya filtrado y ordenado. */
+function paginate<T>(items: T[], config?: PaginationConfig): PaginatedResult<T> {
+  const limit = config?.limit ?? 50;
+  const offset = config?.offset ?? 0;
+  const total = items.length;
+  return {
+    items: items.slice(offset, offset + limit),
+    total,
+    limit,
+    offset,
+    hasMore: offset + limit < total,
+  };
+}
+
+/** Ordena por una propiedad directa del objeto (string o number). */
+function sortByKey<T>(items: T[], field: string, direction: 'asc' | 'desc'): T[] {
+  const multiplier = direction === 'asc' ? 1 : -1;
+  return [...items].sort((a, b) => {
+    const aVal = (a as Record<string, unknown>)[field];
+    const bVal = (b as Record<string, unknown>)[field];
+    if (typeof aVal === 'string' && typeof bVal === 'string') {
+      return aVal.localeCompare(bVal) * multiplier;
+    }
+    return ((aVal as number) - (bVal as number)) * multiplier;
+  });
+}
+
+/** Verifica si una fecha cae dentro de un rango opcional. */
+function isInDateRange(date: Date, range?: DateRange): boolean {
+  if (!range) return true;
+  const from = range.from ? new Date(range.from) : null;
+  const to = range.to ? new Date(range.to) : null;
+  if (from && date < from) return false;
+  if (to && date > to) return false;
+  return true;
+}
+
+// ── Query functions ─────────────────────────────────────────────
+
+/** Resumen global, opcionalmente filtrado por rango de fechas. */
+export function queryGlobalSummary(
+  report: AggregatedReport,
+  filters?: GlobalSummaryFilters,
+): GlobalSummary {
+  if (!filters?.dateRange) {
+    return report.globalSummary;
+  }
+
+  const filteredExecutions = report.executions.filter((exec) =>
+    isInDateRange(new Date(exec.metadata.executionDate.toString()), filters.dateRange),
+  );
+
+  let totalTestCases = 0;
+  let totalPassed = 0;
+  let totalFailed = 0;
+  let totalTime = 0;
+
+  for (const exec of filteredExecutions) {
+    for (const suite of exec.suites) {
+      for (const tc of suite.testCases) {
+        totalTestCases++;
+        if (tc.status === 'passed') totalPassed++;
+        else totalFailed++;
+      }
+    }
+    totalTime += exec.totalTime;
+  }
+
+  const dates = filteredExecutions
+    .map((e) => new Date(e.metadata.executionDate.toString()))
+    .sort((a, b) => a.getTime() - b.getTime());
+
+  return {
+    totalExecutions: filteredExecutions.length,
+    totalTestCases,
+    totalPassed,
+    totalFailed,
+    globalPassRate: totalTestCases > 0
+      ? Math.round((totalPassed / totalTestCases) * 10000) / 100
+      : 0,
+    totalTime,
+    dateRange: {
+      from: dates.length > 0 ? dates[0].toISOString() : '',
+      to: dates.length > 0 ? dates[dates.length - 1].toISOString() : '',
+    },
+  };
+}
+
+/** Categorias con busqueda parcial y ordenamiento. */
+export function queryCategories(
+  report: AggregatedReport,
+  filters?: CategoriesFilters,
+): CategorySummary[] {
+  let result = [...report.categories];
+
+  if (filters?.category) {
+    const needle = filters.category.toLowerCase();
+    result = result.filter((c) => c.category.toLowerCase().includes(needle));
+  }
+
+  const field = filters?.sortBy?.field ?? 'category';
+  const direction = filters?.sortBy?.direction ?? 'asc';
+  return sortByKey(result, field, direction);
+}
+
+/** Productos con filtros multiples, busqueda, ordenamiento y paginacion. */
+export function queryProducts(
+  report: AggregatedReport,
+  filters?: ProductsFilters,
+): PaginatedResult<ProductSummary> {
+  let result = [...report.products];
+
+  if (filters?.category) {
+    const cat = filters.category.toLowerCase();
+    result = result.filter((p) => p.category.toLowerCase() === cat);
+  }
+
+  if (filters?.minPassRate !== undefined) {
+    result = result.filter((p) => p.passRate >= filters.minPassRate!);
+  }
+  if (filters?.maxPassRate !== undefined) {
+    result = result.filter((p) => p.passRate <= filters.maxPassRate!);
+  }
+
+  if (filters?.dateRange) {
+    const range = filters.dateRange;
+    result = result.filter((p) =>
+      p.runs.some((run) => isInDateRange(new Date(run.executionDate), range)),
+    );
+  }
+
+  if (filters?.search) {
+    const needle = filters.search.toLowerCase();
+    result = result.filter((p) => p.product.toLowerCase().includes(needle));
+  }
+
+  const field = filters?.sortBy?.field ?? 'product';
+  const direction = filters?.sortBy?.direction ?? 'asc';
+  result = sortByKey(result, field, direction);
+
+  return paginate(result, filters?.pagination);
+}
+
+/** Test cases con filtros por estabilidad, producto, passRate, busqueda y paginacion. */
+export function queryTestCases(
+  report: AggregatedReport,
+  filters?: TestCasesFilters,
+): PaginatedResult<AggregatedTestCase> {
+  let result = [...report.testCases];
+
+  switch (filters?.statusType) {
+    case 'flaky':
+      result = result.filter((tc) => tc.passRate > 0 && tc.passRate < 100);
+      break;
+    case 'always-passing':
+      result = result.filter((tc) => tc.passRate === 100);
+      break;
+    case 'always-failing':
+      result = result.filter((tc) => tc.passRate === 0);
+      break;
+  }
+
+  if (filters?.product) {
+    const prod = filters.product.toLowerCase();
+    result = result.filter((tc) =>
+      tc.products.some((p) => p.toLowerCase() === prod),
+    );
+  }
+
+  if (filters?.minPassRate !== undefined) {
+    result = result.filter((tc) => tc.passRate >= filters.minPassRate!);
+  }
+  if (filters?.maxPassRate !== undefined) {
+    result = result.filter((tc) => tc.passRate <= filters.maxPassRate!);
+  }
+
+  if (filters?.search) {
+    const needle = filters.search.toLowerCase();
+    result = result.filter((tc) => tc.testCaseName.toLowerCase().includes(needle));
+  }
+
+  const field = filters?.sortBy?.field ?? 'executionCount';
+  const direction = filters?.sortBy?.direction ?? 'desc';
+  result = sortByKey(result, field, direction);
+
+  return paginate(result, filters?.pagination);
+}
+
+/** Ejecuciones con filtros por categoria, producto, rango de fecha y paginacion. */
+export function queryExecutions(
+  report: AggregatedReport,
+  filters?: ExecutionsFilters,
+): PaginatedResult<TestExecution> {
+  let result = [...report.executions];
+
+  if (filters?.category) {
+    const cat = filters.category.toLowerCase();
+    result = result.filter((e) => e.metadata.category.toLowerCase() === cat);
+  }
+
+  if (filters?.product) {
+    const prod = filters.product.toLowerCase();
+    result = result.filter((e) => e.metadata.product.toLowerCase() === prod);
+  }
+
+  if (filters?.dateRange) {
+    result = result.filter((e) =>
+      isInDateRange(new Date(e.metadata.executionDate.toString()), filters.dateRange),
+    );
+  }
+
+  const sortField = filters?.sortBy?.field ?? 'executionDate';
+  const sortDir = filters?.sortBy?.direction ?? 'desc';
+  const multiplier = sortDir === 'asc' ? 1 : -1;
+
+  result.sort((a, b) => {
+    switch (sortField) {
+      case 'filePath': return a.filePath.localeCompare(b.filePath) * multiplier;
+      case 'category': return a.metadata.category.localeCompare(b.metadata.category) * multiplier;
+      case 'product': return a.metadata.product.localeCompare(b.metadata.product) * multiplier;
+      case 'executionDate':
+        return (new Date(a.metadata.executionDate.toString()).getTime() - new Date(b.metadata.executionDate.toString()).getTime()) * multiplier;
+      case 'totalTests': return (a.totalTests - b.totalTests) * multiplier;
+      case 'totalTime': return (a.totalTime - b.totalTime) * multiplier;
+      default: return 0;
+    }
+  });
+
+  return paginate(result, filters?.pagination);
+}
+
+/**
+ * Detalle de un producto con sus test cases relacionados.
+ * Retorna `null` si el producto no existe en el reporte.
+ */
+export function queryProductDetail(
+  report: AggregatedReport,
+  productName: string,
+): ProductDetailResult | null {
+  const product = report.products.find(
+    (p) => p.product.toLowerCase() === productName.toLowerCase(),
+  );
+
+  if (!product) return null;
+
+  const relatedTestCases = report.testCases.filter((tc) =>
+    tc.products.some((p) => p.toLowerCase() === productName.toLowerCase()),
+  );
+
+  return { ...product, relatedTestCases };
+}
+
+/** Tests flaky (0 < passRate < 100) con umbrales configurables y paginacion. */
+export function queryFlakyTests(
+  report: AggregatedReport,
+  filters?: FlakyTestsFilters,
+): PaginatedResult<AggregatedTestCase> {
+  const minPassRate = filters?.minPassRate ?? 0;
+  const maxPassRate = filters?.maxPassRate ?? 100;
+  const minExecs = filters?.minExecutions ?? 2;
+
+  let result = report.testCases.filter((tc) =>
+    tc.passRate > minPassRate &&
+    tc.passRate < maxPassRate &&
+    tc.passRate > 0 &&
+    tc.passRate < 100 &&
+    tc.executionCount >= minExecs,
+  );
+
+  const field = filters?.sortBy?.field ?? 'passRate';
+  const direction = filters?.sortBy?.direction ?? 'asc';
+  result = sortByKey(result, field, direction);
+
+  return paginate(result, filters?.pagination);
+}
+
+/** Top N tests mas lentos ordenados por la metrica seleccionada. */
+export function querySlowestTests(
+  report: AggregatedReport,
+  filters?: SlowestTestsFilters,
+): AggregatedTestCase[] {
+  const topN = filters?.topN ?? 10;
+  const metric = filters?.metric ?? 'avgTime';
+
+  return [...report.testCases]
+    .sort((a, b) => b[metric] - a[metric])
+    .slice(0, topN);
+}
+
+/** Analisis de fallos agrupados por mensaje de error, con filtros y paginacion. */
+export function queryFailureAnalysis(
+  report: AggregatedReport,
+  filters?: FailureAnalysisFilters,
+): PaginatedResult<FailureGroup> {
+  const messageMap = new Map<string, {
+    occurrences: number;
+    tests: Set<string>;
+    products: Set<string>;
+  }>();
+
+  let testCases = report.testCases;
+
+  if (filters?.product) {
+    const prod = filters.product.toLowerCase();
+    testCases = testCases.filter((tc) =>
+      tc.products.some((p) => p.toLowerCase() === prod),
+    );
+  }
+
+  for (const tc of testCases) {
+    for (const msg of tc.distinctFailureMessages) {
+      let entry = messageMap.get(msg);
+      if (!entry) {
+        entry = { occurrences: 0, tests: new Set(), products: new Set() };
+        messageMap.set(msg, entry);
+      }
+      entry.occurrences += tc.failCount;
+      entry.tests.add(tc.testCaseName);
+      for (const prod of tc.products) {
+        entry.products.add(prod);
+      }
+    }
+  }
+
+  let result: FailureGroup[] = [...messageMap.entries()].map(([message, entry]) => ({
+    message,
+    occurrences: entry.occurrences,
+    affectedTests: [...entry.tests].sort(),
+    affectedProducts: [...entry.products].sort(),
+  }));
+
+  const minOccurrences = filters?.minOccurrences ?? 1;
+  result = result.filter((fg) => fg.occurrences >= minOccurrences);
+
+  if (filters?.search) {
+    const needle = filters.search.toLowerCase();
+    result = result.filter((fg) => fg.message.toLowerCase().includes(needle));
+  }
+
+  result.sort((a, b) => b.occurrences - a.occurrences);
+
+  return paginate(result, filters?.pagination);
+}

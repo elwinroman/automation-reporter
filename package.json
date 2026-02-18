@@ -1,0 +1,29 @@
+{
+  "name": "automation-reporter",
+  "version": "1.0.0",
+  "description": "CLI para generar reportes estadísticos de logs de automatización JUnit",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "automation-reporter": "dist/index.js"
+  },
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "dev:server": "tsx src/index.ts serve",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/index.js",
+    "start:server": "node dist/index.js serve"
+  },
+  "dependencies": {
+    "@trpc/server": "^11.9.0",
+    "commander": "^13.1.0",
+    "dotenv": "^17.3.1",
+    "fast-xml-parser": "^5.2.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}
