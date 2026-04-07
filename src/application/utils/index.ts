@@ -1,6 +1,6 @@
-export { extractFolderMetadata } from './FolderMetadataExtractor.js';
-export { aggregateTestCases } from './TestCaseAggregator.js';
-export { assembleReport } from './ReportAssembler.js';
+export { extractFolderMetadata } from './FolderMetadataExtractor.js'
+export { aggregateTestCases } from './TestCaseAggregator.js'
+export { assembleReport } from './ReportAssembler.js'
 export {
   queryGlobalSummary,
   queryCategories,
@@ -14,4 +14,4 @@ export {
   type PaginatedResult,
   type FailureGroup,
   type ProductDetailResult,
-} from './ReportQueries.js';
+} from './ReportQueries.js'

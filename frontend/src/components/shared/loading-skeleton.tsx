@@ -1,4 +1,4 @@
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from '@/components/ui/skeleton'
 
 export function LoadingSkeleton() {
   return (
@@ -11,7 +11,7 @@ export function LoadingSkeleton() {
       <Skeleton className="h-[300px] rounded-lg" />
       <Skeleton className="h-[200px] rounded-lg" />
     </div>
-  );
+  )
 }
 
 export function TableSkeleton({ rows = 5 }: { rows?: number }) {
@@ -22,5 +22,5 @@ export function TableSkeleton({ rows = 5 }: { rows?: number }) {
         <Skeleton key={i} className="h-12 w-full" />
       ))}
     </div>
-  );
+  )
 }

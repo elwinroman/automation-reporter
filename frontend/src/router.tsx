@@ -1,16 +1,16 @@
-import { createBrowserRouter } from 'react-router';
-import { RootLayout } from '@/components/layout/root-layout';
-import { VersionGuard } from '@/components/layout/version-guard';
-import VersionSelector from '@/pages/version-selector';
-import Dashboard from '@/pages/dashboard';
-import Categories from '@/pages/categories';
-import Products from '@/pages/products';
-import ProductDetail from '@/pages/product-detail';
-import TestCases from '@/pages/test-cases';
-import Executions from '@/pages/executions';
-import FlakyTests from '@/pages/flaky-tests';
-import SlowestTests from '@/pages/slowest-tests';
-import FailureAnalysis from '@/pages/failure-analysis';
+import { createBrowserRouter } from 'react-router'
+import { RootLayout } from '@/components/layout/root-layout'
+import { VersionGuard } from '@/components/layout/version-guard'
+import VersionSelector from '@/pages/version-selector'
+import Dashboard from '@/pages/dashboard'
+import Categories from '@/pages/categories'
+import Products from '@/pages/products'
+import ProductDetail from '@/pages/product-detail'
+import TestCases from '@/pages/test-cases'
+import Executions from '@/pages/executions'
+import FlakyTests from '@/pages/flaky-tests'
+import SlowestTests from '@/pages/slowest-tests'
+import FailureAnalysis from '@/pages/failure-analysis'
 
 export const router = createBrowserRouter([
   {
@@ -36,4 +36,4 @@ export const router = createBrowserRouter([
       },
     ],
   },
-]);
+])

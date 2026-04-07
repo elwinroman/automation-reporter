@@ -1,12 +1,12 @@
-import { initTRPC, TRPCError } from '@trpc/server';
-import type { TrpcContext } from './context.js';
-import type { ReportStore } from './reportStore.js';
-import type { AggregatedReport } from '../../domain/entities/index.js';
+import { initTRPC, TRPCError } from '@trpc/server'
+import type { TrpcContext } from './context.js'
+import type { ReportStore } from './reportStore.js'
+import type { AggregatedReport } from '../../domain/entities/index.js'
 
-const t = initTRPC.context<TrpcContext>().create();
+const t = initTRPC.context<TrpcContext>().create()
 
-export const router = t.router;
-export const publicProcedure = t.procedure;
+export const router = t.router
+export const publicProcedure = t.procedure
 
 /**
  * Obtiene el reporte cacheado para una version.
@@ -17,7 +17,7 @@ export function getVersionReport(reportStore: ReportStore, version: string): Agg
     throw new TRPCError({
       code: 'PRECONDITION_FAILED',
       message: `No report for version "${version}". Call report.generate first.`,
-    });
+    })
   }
-  return reportStore.getReport(version);
+  return reportStore.getReport(version)
 }

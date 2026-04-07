@@ -1,4 +1,4 @@
-import type { TestExecution, AggregatedTestCase } from '../../domain/entities/index.js';
+import type { TestExecution, AggregatedTestCase } from '../../domain/entities/index.js'
 
 /**
  * Agrupa test cases por nombre a traves de todas las ejecuciones y calcula
@@ -13,12 +13,12 @@ export function aggregateTestCases(executions: TestExecution[]): AggregatedTestC
     times: number[];
     products: Set<string>;
     failureMessages: Set<string>;
-  }>();
+  }>()
 
   for (const execution of executions) {
     for (const suite of execution.suites) {
       for (const tc of suite.testCases) {
-        let entry = map.get(tc.name);
+        let entry = map.get(tc.name)
         if (!entry) {
           entry = {
             passCount: 0,
@@ -26,31 +26,31 @@ export function aggregateTestCases(executions: TestExecution[]): AggregatedTestC
             times: [],
             products: new Set(),
             failureMessages: new Set(),
-          };
-          map.set(tc.name, entry);
+          }
+          map.set(tc.name, entry)
         }
 
         if (tc.status === 'passed') {
-          entry.passCount++;
+          entry.passCount++
         } else {
-          entry.failCount++;
+          entry.failCount++
         }
 
-        entry.times.push(tc.time);
-        entry.products.add(execution.metadata.product);
+        entry.times.push(tc.time)
+        entry.products.add(execution.metadata.product)
 
         for (const msg of tc.failureMessages) {
-          entry.failureMessages.add(msg);
+          entry.failureMessages.add(msg)
         }
       }
     }
   }
 
-  const result: AggregatedTestCase[] = [];
+  const result: AggregatedTestCase[] = []
 
   for (const [testCaseName, entry] of map) {
-    const executionCount = entry.passCount + entry.failCount;
-    const totalTime = entry.times.reduce((a, b) => a + b, 0);
+    const executionCount = entry.passCount + entry.failCount
+    const totalTime = entry.times.reduce((a, b) => a + b, 0)
 
     result.push({
       testCaseName,
@@ -64,8 +64,8 @@ export function aggregateTestCases(executions: TestExecution[]): AggregatedTestC
       maxTime: Math.max(...entry.times),
       products: [...entry.products].sort(),
       distinctFailureMessages: [...entry.failureMessages],
-    });
+    })
   }
 
-  return result.sort((a, b) => b.executionCount - a.executionCount);
+  return result.sort((a, b) => b.executionCount - a.executionCount)
 }

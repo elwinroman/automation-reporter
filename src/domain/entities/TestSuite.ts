@@ -1,4 +1,4 @@
-import type { TestCase } from './TestCase.js';
+import type { TestCase } from './TestCase.js'
 
 /** Suite de tests correspondiente a un elemento `<testsuite>` del JUnit XML. */
 export interface TestSuite {

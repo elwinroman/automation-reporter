@@ -1,14 +1,14 @@
-import { useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { trpc } from '@/lib/trpc';
-import { useVersion } from '@/context/version-context';
-import { formatTime } from '@/lib/format';
-import { PageHeader } from '@/components/shared/page-header';
-import { DataTable, type Column } from '@/components/shared/data-table';
-import { LoadingSkeleton } from '@/components/shared/loading-skeleton';
-import { ErrorFallback } from '@/components/shared/error-fallback';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select } from '@/components/ui/select';
+import { useState } from 'react'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { trpc } from '@/lib/trpc'
+import { useVersion } from '@/context/version-context'
+import { formatTime } from '@/lib/format'
+import { PageHeader } from '@/components/shared/page-header'
+import { DataTable, type Column } from '@/components/shared/data-table'
+import { LoadingSkeleton } from '@/components/shared/loading-skeleton'
+import { ErrorFallback } from '@/components/shared/error-fallback'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Select } from '@/components/ui/select'
 
 type Metric = 'avgTime' | 'maxTime' | 'totalTime';
 
@@ -16,7 +16,7 @@ const metricLabels: Record<Metric, string> = {
   avgTime: 'Average Time',
   maxTime: 'Max Time',
   totalTime: 'Total Time',
-};
+}
 
 interface TestRow {
   testCaseName: string;
@@ -28,25 +28,25 @@ interface TestRow {
 }
 
 export default function SlowestTests() {
-  const { version } = useVersion();
-  const [metric, setMetric] = useState<Metric>('avgTime');
-  const [topN, setTopN] = useState(10);
+  const { version } = useVersion()
+  const [metric, setMetric] = useState<Metric>('avgTime')
+  const [topN, setTopN] = useState(10)
 
   const query = trpc.report.slowestTests.useQuery({
     version: version!,
     metric,
     topN,
-  });
+  })
 
-  if (query.isLoading) return <LoadingSkeleton />;
-  if (query.isError) return <ErrorFallback message={query.error.message} onRetry={() => query.refetch()} />;
+  if (query.isLoading) return <LoadingSkeleton />
+  if (query.isError) return <ErrorFallback message={query.error.message} onRetry={() => query.refetch()} />
 
-  const data = query.data ?? [];
+  const data = query.data ?? []
 
   const chartData = data.map((d) => ({
     name: d.testCaseName.length > 30 ? d.testCaseName.slice(0, 30) + '...' : d.testCaseName,
     value: Number(d[metric].toFixed(2)),
-  }));
+  }))
 
   const columns: Column<TestRow>[] = [
     { key: 'testCaseName', header: 'Test Case', render: (r) => <span className="truncate max-w-[300px] block">{r.testCaseName}</span> },
@@ -55,7 +55,7 @@ export default function SlowestTests() {
     { key: 'maxTime', header: 'Max Time', className: 'text-right', render: (r) => formatTime(r.maxTime) },
     { key: 'totalTime', header: 'Total Time', className: 'text-right', render: (r) => formatTime(r.totalTime) },
     { key: 'minTime', header: 'Min Time', className: 'text-right', render: (r) => formatTime(r.minTime) },
-  ];
+  ]
 
   return (
     <div className="space-y-6">
@@ -92,5 +92,5 @@ export default function SlowestTests() {
 
       <DataTable columns={columns} data={data} />
     </div>
-  );
+  )
 }

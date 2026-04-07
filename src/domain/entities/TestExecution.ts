@@ -1,5 +1,5 @@
-import type { FolderMetadata } from '../value-objects/index.js';
-import type { TestSuite } from './TestSuite.js';
+import type { FolderMetadata } from '../value-objects/index.js'
+import type { TestSuite } from './TestSuite.js'
 
 /** Representa el resultado de parsear un archivo summary.xml individual. */
 export interface TestExecution {

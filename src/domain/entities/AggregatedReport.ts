@@ -1,4 +1,4 @@
-import type { TestExecution } from './TestExecution.js';
+import type { TestExecution } from './TestExecution.js'
 
 /** Metadatos de generacion del reporte. */
 export interface ReportMetadata {
@@ -33,6 +33,15 @@ export interface CategorySummary {
   totalTime: number;
 }
 
+/** Test case individual dentro de una ejecucion de producto. */
+export interface ProductRunTestCase {
+  name: string;
+  status: 'passed' | 'failed';
+  /** Duracion en segundos. */
+  time: number;
+  failureMessages: string[];
+}
+
 /** Resultado de una ejecucion individual dentro de un producto. */
 export interface ProductRun {
   folderName: string;
@@ -42,6 +51,12 @@ export interface ProductRun {
   failed: number;
   /** Tiempo en segundos. */
   time: number;
+  /** Path completo de esta ejecucion. Ej: "Creditos\Otorgamiento\Agricola" */
+  path: string;
+  /** Ruta absoluta al index.html del reporte de esta ejecucion. */
+  indexHtml: string;
+  /** Test cases ejecutados en esta ejecucion. */
+  testCases: ProductRunTestCase[];
 }
 
 /** Estadisticas agregadas por producto, incluyendo el historial de ejecuciones. */
@@ -51,6 +66,12 @@ export interface ProductSummary {
   executionCount: number;
   passRate: number;
   runs: ProductRun[];
+  /**
+   * Union de todos los segmentos de path encontrados en las ejecuciones de este producto.
+   * Ej: ["Creditos", "Reprogramacion", "Rural"] o ["Creditos", "Refinanciamiento", "Rural"]
+   * cuando el mismo nombre de producto aparece bajo distintos sub-paths.
+   */
+  tags: string[];
 }
 
 /**

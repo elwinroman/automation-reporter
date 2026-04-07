@@ -1,9 +1,9 @@
-import type { ReactNode } from 'react';
-import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
-import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { DataTablePagination } from './data-table-pagination';
+import type { ReactNode } from 'react'
+import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
+import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from '@/components/ui/table'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+import { DataTablePagination } from './data-table-pagination'
 
 export interface Column<T> {
   key: string;
@@ -45,10 +45,10 @@ export function DataTable<T>({
   className,
 }: DataTableProps<T>) {
   function renderSortIcon(key: string) {
-    if (!sort || sort.field !== key) return <ArrowUpDown className="ml-1 h-3 w-3" />;
+    if (!sort || sort.field !== key) return <ArrowUpDown className="ml-1 h-3 w-3" />
     return sort.direction === 'asc'
       ? <ArrowUp className="ml-1 h-3 w-3" />
-      : <ArrowDown className="ml-1 h-3 w-3" />;
+      : <ArrowDown className="ml-1 h-3 w-3" />
   }
 
   return (
@@ -108,5 +108,5 @@ export function DataTable<T>({
         />
       )}
     </div>
-  );
+  )
 }

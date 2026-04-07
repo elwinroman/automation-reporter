@@ -1,2 +1,2 @@
-export { generateReport } from './GenerateReport.js';
-export type { GenerateReportDeps } from './GenerateReport.js';
+export { generateReport } from './GenerateReport.js'
+export type { GenerateReportDeps } from './GenerateReport.js'

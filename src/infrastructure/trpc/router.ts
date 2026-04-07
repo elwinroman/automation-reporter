@@ -1,4 +1,4 @@
-import { router } from './trpc.js';
+import { router } from './trpc.js'
 import {
   versions,
   generate,
@@ -11,7 +11,7 @@ import {
   flakyTests,
   slowestTests,
   failureAnalysis,
-} from './procedures/index.js';
+} from './procedures/index.js'
 
 /** Router principal de la aplicacion. Todos los procedimientos bajo `report.*`. */
 export const appRouter = router({
@@ -28,7 +28,7 @@ export const appRouter = router({
     slowestTests,
     failureAnalysis,
   }),
-});
+})
 
 /** Tipo del router para importar en el frontend con `@trpc/client`. */
 export type AppRouter = typeof appRouter;

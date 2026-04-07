@@ -1,5 +1,5 @@
-import { AlertTriangle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { AlertTriangle } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 interface ErrorFallbackProps {
   message?: string;
@@ -20,5 +20,5 @@ export function ErrorFallback({ message, onRetry }: ErrorFallbackProps) {
         </Button>
       )}
     </div>
-  );
+  )
 }

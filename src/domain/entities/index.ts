@@ -1,6 +1,6 @@
-export type { TestCase } from './TestCase.js';
-export type { TestSuite } from './TestSuite.js';
-export type { TestExecution } from './TestExecution.js';
+export type { TestCase } from './TestCase.js'
+export type { TestSuite } from './TestSuite.js'
+export type { TestExecution } from './TestExecution.js'
 export type {
   AggregatedReport,
   ReportMetadata,
@@ -9,4 +9,4 @@ export type {
   ProductSummary,
   ProductRun,
   AggregatedTestCase,
-} from './AggregatedReport.js';
+} from './AggregatedReport.js'

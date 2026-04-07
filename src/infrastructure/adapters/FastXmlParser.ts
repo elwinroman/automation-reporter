@@ -1,6 +1,6 @@
-import { XMLParser } from 'fast-xml-parser';
-import type { XmlParser, ParsedTestSuites } from '../../domain/ports/index.js';
-import type { TestSuite, TestCase } from '../../domain/entities/index.js';
+import { XMLParser } from 'fast-xml-parser'
+import type { XmlParser, ParsedTestSuites } from '../../domain/ports/index.js'
+import type { TestSuite, TestCase } from '../../domain/entities/index.js'
 
 // --- Tipos internos que mapean la estructura raw del XML con atributos prefijados por '@_' ---
 
@@ -41,22 +41,22 @@ interface RawTestSuites {
  * El status de un test se determina por la presencia de elementos `<failure>`.
  */
 export class FastXmlParserAdapter implements XmlParser {
-  private parser: XMLParser;
+  private parser: XMLParser
 
   constructor() {
     this.parser = new XMLParser({
       ignoreAttributes: false,
       isArray: (name) => {
-        return ['testsuite', 'testcase', 'failure'].includes(name);
+        return ['testsuite', 'testcase', 'failure'].includes(name)
       },
-    });
+    })
   }
 
   parse(xmlContent: string): ParsedTestSuites {
-    const parsed = this.parser.parse(xmlContent);
-    const raw: RawTestSuites = parsed.testsuites;
+    const parsed = this.parser.parse(xmlContent)
+    const raw: RawTestSuites = parsed.testsuites
 
-    const suites: TestSuite[] = (raw.testsuite ?? []).map((rs) => this.mapSuite(rs));
+    const suites: TestSuite[] = (raw.testsuite ?? []).map((rs) => this.mapSuite(rs))
 
     return {
       name: raw['@_name'],
@@ -65,11 +65,11 @@ export class FastXmlParserAdapter implements XmlParser {
       errors: parseInt(raw['@_errors']),
       time: parseFloat(raw['@_time']),
       suites,
-    };
+    }
   }
 
   private mapSuite(raw: RawTestSuite): TestSuite {
-    const testCases: TestCase[] = (raw.testcase ?? []).map((rtc) => this.mapTestCase(rtc));
+    const testCases: TestCase[] = (raw.testcase ?? []).map((rtc) => this.mapTestCase(rtc))
 
     return {
       name: raw['@_name'],
@@ -80,14 +80,14 @@ export class FastXmlParserAdapter implements XmlParser {
       hostname: raw['@_hostname'],
       timestamp: raw['@_timestamp'],
       testCases,
-    };
+    }
   }
 
   private mapTestCase(raw: RawTestCase): TestCase {
-    const failures = raw.failure ?? [];
+    const failures = raw.failure ?? []
     const failureMessages = failures
       .map((f) => f['@_message'] ?? '')
-      .filter((msg) => msg.length > 0);
+      .filter((msg) => msg.length > 0)
 
     return {
       name: raw['@_name'],
@@ -95,6 +95,6 @@ export class FastXmlParserAdapter implements XmlParser {
       time: parseFloat(raw['@_time']),
       status: failures.length > 0 ? 'failed' : 'passed',
       failureMessages,
-    };
+    }
   }
 }

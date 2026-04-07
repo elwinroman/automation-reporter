@@ -1,6 +1,6 @@
-import { Outlet } from 'react-router';
-import { Sidebar } from './sidebar';
-import { Header } from './header';
+import { Outlet } from 'react-router'
+import { Sidebar } from './sidebar'
+import { Header } from './header'
 
 export function RootLayout() {
   return (
@@ -13,5 +13,5 @@ export function RootLayout() {
         </main>
       </div>
     </div>
-  );
+  )
 }

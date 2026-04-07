@@ -1,4 +1,4 @@
-import type { TestStatus } from '../value-objects/index.js';
+import type { TestStatus } from '../value-objects/index.js'
 
 /** Test case individual parseado de un archivo JUnit XML. */
 export interface TestCase {

@@ -1,4 +1,4 @@
-import type { TestSuite } from '../entities/index.js';
+import type { TestSuite } from '../entities/index.js'
 
 /** Resultado del parseo de un archivo JUnit XML completo (elemento raiz `<testsuites>`). */
 export interface ParsedTestSuites {

@@ -1,6 +1,6 @@
-import { Search } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
+import { Search } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { cn } from '@/lib/utils'
 
 interface SearchInputProps {
   value: string;
@@ -21,5 +21,5 @@ export function SearchInput({ value, onChange, placeholder = 'Search...', classN
         className="pl-8"
       />
     </div>
-  );
+  )
 }

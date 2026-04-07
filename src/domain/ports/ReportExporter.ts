@@ -1,4 +1,4 @@
-import type { AggregatedReport } from '../entities/index.js';
+import type { AggregatedReport } from '../entities/index.js'
 
 /** Puerto para exportar un reporte agregado a un destino persistente. */
 export interface ReportExporter {

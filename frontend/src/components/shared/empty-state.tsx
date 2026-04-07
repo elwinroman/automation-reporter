@@ -1,5 +1,5 @@
-import type { LucideIcon } from 'lucide-react';
-import { Inbox } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react'
+import { Inbox } from 'lucide-react'
 
 interface EmptyStateProps {
   icon?: LucideIcon;
@@ -16,5 +16,5 @@ export function EmptyState({ icon: Icon = Inbox, title, description }: EmptyStat
         <p className="text-sm text-muted-foreground mt-1 max-w-sm">{description}</p>
       )}
     </div>
-  );
+  )
 }

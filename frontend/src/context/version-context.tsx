@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
 
 interface VersionContextValue {
   version: string | null;
@@ -6,28 +6,28 @@ interface VersionContextValue {
   clearVersion: () => void;
 }
 
-const VersionContext = createContext<VersionContextValue | null>(null);
+const VersionContext = createContext<VersionContextValue | null>(null)
 
 export function VersionProvider({ children }: { children: ReactNode }) {
-  const [version, setVersionState] = useState<string | null>(null);
+  const [version, setVersionState] = useState<string | null>(null)
 
   const setVersion = useCallback((v: string) => {
-    setVersionState(v);
-  }, []);
+    setVersionState(v)
+  }, [])
 
   const clearVersion = useCallback(() => {
-    setVersionState(null);
-  }, []);
+    setVersionState(null)
+  }, [])
 
   return (
     <VersionContext.Provider value={{ version, setVersion, clearVersion }}>
       {children}
     </VersionContext.Provider>
-  );
+  )
 }
 
 export function useVersion() {
-  const ctx = useContext(VersionContext);
-  if (!ctx) throw new Error('useVersion must be used within VersionProvider');
-  return ctx;
+  const ctx = useContext(VersionContext)
+  if (!ctx) throw new Error('useVersion must be used within VersionProvider')
+  return ctx
 }

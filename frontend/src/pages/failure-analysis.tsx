@@ -1,17 +1,17 @@
-import { useState } from 'react';
-import { trpc } from '@/lib/trpc';
-import { useVersion } from '@/context/version-context';
-import { formatNumber } from '@/lib/format';
-import { PageHeader } from '@/components/shared/page-header';
-import { SearchInput } from '@/components/shared/search-input';
-import { DataTable, type Column } from '@/components/shared/data-table';
-import { TableSkeleton } from '@/components/shared/loading-skeleton';
-import { ErrorFallback } from '@/components/shared/error-fallback';
-import { Badge } from '@/components/ui/badge';
-import { Tooltip } from '@/components/ui/tooltip';
-import { Input } from '@/components/ui/input';
-import { useDebouncedValue } from '@/hooks/use-debounced-value';
-import { usePagination } from '@/hooks/use-pagination';
+import { useState } from 'react'
+import { trpc } from '@/lib/trpc'
+import { useVersion } from '@/context/version-context'
+import { formatNumber } from '@/lib/format'
+import { PageHeader } from '@/components/shared/page-header'
+import { SearchInput } from '@/components/shared/search-input'
+import { DataTable, type Column } from '@/components/shared/data-table'
+import { TableSkeleton } from '@/components/shared/loading-skeleton'
+import { ErrorFallback } from '@/components/shared/error-fallback'
+import { Badge } from '@/components/ui/badge'
+import { Tooltip } from '@/components/ui/tooltip'
+import { Input } from '@/components/ui/input'
+import { useDebouncedValue } from '@/hooks/use-debounced-value'
+import { usePagination } from '@/hooks/use-pagination'
 
 interface FailureRow {
   message: string;
@@ -21,12 +21,12 @@ interface FailureRow {
 }
 
 export default function FailureAnalysis() {
-  const { version } = useVersion();
-  const [search, setSearch] = useState('');
-  const [minOccurrences, setMinOccurrences] = useState(1);
-  const [product, setProduct] = useState('');
-  const debouncedSearch = useDebouncedValue(search);
-  const pagination = usePagination({ pageSize: 20 });
+  const { version } = useVersion()
+  const [search, setSearch] = useState('')
+  const [minOccurrences, setMinOccurrences] = useState(1)
+  const [product, setProduct] = useState('')
+  const debouncedSearch = useDebouncedValue(search)
+  const pagination = usePagination({ pageSize: 20 })
 
   const query = trpc.report.failureAnalysis.useQuery({
     version: version!,
@@ -34,7 +34,7 @@ export default function FailureAnalysis() {
     product: product || undefined,
     search: debouncedSearch || undefined,
     pagination: { limit: pagination.pageSize, offset: pagination.offset },
-  });
+  })
 
   const columns: Column<FailureRow>[] = [
     {
@@ -68,12 +68,12 @@ export default function FailureAnalysis() {
         </div>
       ),
     },
-  ];
+  ]
 
-  if (query.isLoading) return <TableSkeleton />;
-  if (query.isError) return <ErrorFallback message={query.error.message} onRetry={() => query.refetch()} />;
+  if (query.isLoading) return <TableSkeleton />
+  if (query.isError) return <ErrorFallback message={query.error.message} onRetry={() => query.refetch()} />
 
-  const result = query.data!;
+  const result = query.data!
 
   return (
     <div className="space-y-4">
@@ -81,16 +81,16 @@ export default function FailureAnalysis() {
       <div className="flex flex-wrap gap-3 items-end">
         <div>
           <label className="text-xs text-muted-foreground">Min Occurrences</label>
-          <Input type="number" min={1} value={minOccurrences} onChange={(e) => { setMinOccurrences(Number(e.target.value) || 1); pagination.resetPage(); }} className="w-32" />
+          <Input type="number" min={1} value={minOccurrences} onChange={(e) => { setMinOccurrences(Number(e.target.value) || 1); pagination.resetPage() }} className="w-32" />
         </div>
         <Input
           type="text"
           placeholder="Filter by product..."
           value={product}
-          onChange={(e) => { setProduct(e.target.value); pagination.resetPage(); }}
+          onChange={(e) => { setProduct(e.target.value); pagination.resetPage() }}
           className="w-48"
         />
-        <SearchInput value={search} onChange={(v) => { setSearch(v); pagination.resetPage(); }} placeholder="Search error messages..." className="max-w-sm" />
+        <SearchInput value={search} onChange={(v) => { setSearch(v); pagination.resetPage() }} placeholder="Search error messages..." className="max-w-sm" />
       </div>
       <DataTable
         columns={columns}
@@ -101,5 +101,5 @@ export default function FailureAnalysis() {
         onPageChange={pagination.goToPage}
       />
     </div>
-  );
+  )
 }

@@ -1,15 +1,15 @@
-import { useState, useCallback } from 'react';
-import { trpc } from '@/lib/trpc';
-import { useVersion } from '@/context/version-context';
-import { formatNumber } from '@/lib/format';
-import { PageHeader } from '@/components/shared/page-header';
-import { DataTable, type Column } from '@/components/shared/data-table';
-import { PassRateBadge } from '@/components/shared/pass-rate-badge';
-import { TableSkeleton } from '@/components/shared/loading-skeleton';
-import { ErrorFallback } from '@/components/shared/error-fallback';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { usePagination } from '@/hooks/use-pagination';
+import { useState, useCallback } from 'react'
+import { trpc } from '@/lib/trpc'
+import { useVersion } from '@/context/version-context'
+import { formatNumber } from '@/lib/format'
+import { PageHeader } from '@/components/shared/page-header'
+import { DataTable, type Column } from '@/components/shared/data-table'
+import { PassRateBadge } from '@/components/shared/pass-rate-badge'
+import { TableSkeleton } from '@/components/shared/loading-skeleton'
+import { ErrorFallback } from '@/components/shared/error-fallback'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import { usePagination } from '@/hooks/use-pagination'
 
 type SortField = 'testCaseName' | 'passRate' | 'executionCount' | 'failCount';
 
@@ -23,15 +23,15 @@ interface FlakyRow {
 }
 
 export default function FlakyTests() {
-  const { version } = useVersion();
-  const pagination = usePagination({ pageSize: 20 });
-  const [minExecutions, setMinExecutions] = useState(2);
-  const [minPassRate, setMinPassRate] = useState(0);
-  const [maxPassRate, setMaxPassRate] = useState(100);
+  const { version } = useVersion()
+  const pagination = usePagination({ pageSize: 20 })
+  const [minExecutions, setMinExecutions] = useState(2)
+  const [minPassRate, setMinPassRate] = useState(0)
+  const [maxPassRate, setMaxPassRate] = useState(100)
   const [sort, setSort] = useState<{ field: SortField; direction: 'asc' | 'desc' }>({
     field: 'passRate',
     direction: 'asc',
-  });
+  })
 
   const query = trpc.report.flakyTests.useQuery({
     version: version!,
@@ -40,15 +40,15 @@ export default function FlakyTests() {
     maxPassRate,
     sortBy: sort,
     pagination: { limit: pagination.pageSize, offset: pagination.offset },
-  });
+  })
 
   const handleSort = useCallback((field: string) => {
     setSort((prev) => ({
       field: field as SortField,
       direction: prev.field === field && prev.direction === 'asc' ? 'desc' : 'asc',
-    }));
-    pagination.resetPage();
-  }, [pagination]);
+    }))
+    pagination.resetPage()
+  }, [pagination])
 
   const columns: Column<FlakyRow>[] = [
     { key: 'testCaseName', header: 'Test Case', sortable: true, render: (r) => <span className="truncate max-w-[300px] block">{r.testCaseName}</span> },
@@ -66,28 +66,28 @@ export default function FlakyTests() {
         </div>
       ),
     },
-  ];
+  ]
 
-  if (query.isLoading) return <TableSkeleton />;
-  if (query.isError) return <ErrorFallback message={query.error.message} onRetry={() => query.refetch()} />;
+  if (query.isLoading) return <TableSkeleton />
+  if (query.isError) return <ErrorFallback message={query.error.message} onRetry={() => query.refetch()} />
 
-  const result = query.data!;
+  const result = query.data!
 
   return (
     <div className="space-y-4">
       <PageHeader title="Flaky Tests" description="Tests with inconsistent pass/fail results" />
       <div className="flex flex-wrap gap-3 items-end">
         <div>
-          <label className="text-xs text-muted-foreground">Min Executions</label>
-          <Input type="number" min={1} value={minExecutions} onChange={(e) => { setMinExecutions(Number(e.target.value) || 2); pagination.resetPage(); }} className="w-32" />
+          <label className="text-xs text-muted-foreground">Min Ejecuciones E2E</label>
+          <Input type="number" min={1} value={minExecutions} onChange={(e) => { setMinExecutions(Number(e.target.value) || 2); pagination.resetPage() }} className="w-32" />
         </div>
         <div>
           <label className="text-xs text-muted-foreground">Min Pass Rate %</label>
-          <Input type="number" min={0} max={100} value={minPassRate} onChange={(e) => { setMinPassRate(Number(e.target.value) || 0); pagination.resetPage(); }} className="w-32" />
+          <Input type="number" min={0} max={100} value={minPassRate} onChange={(e) => { setMinPassRate(Number(e.target.value) || 0); pagination.resetPage() }} className="w-32" />
         </div>
         <div>
           <label className="text-xs text-muted-foreground">Max Pass Rate %</label>
-          <Input type="number" min={0} max={100} value={maxPassRate} onChange={(e) => { setMaxPassRate(Number(e.target.value) || 100); pagination.resetPage(); }} className="w-32" />
+          <Input type="number" min={0} max={100} value={maxPassRate} onChange={(e) => { setMaxPassRate(Number(e.target.value) || 100); pagination.resetPage() }} className="w-32" />
         </div>
       </div>
       <DataTable
@@ -101,5 +101,5 @@ export default function FlakyTests() {
         onPageChange={pagination.goToPage}
       />
     </div>
-  );
+  )
 }

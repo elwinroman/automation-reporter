@@ -10,4 +10,11 @@ export interface FolderMetadata {
   executionDate: Date;
   /** Nombre original de la carpeta que contiene el summary.xml. */
   rawFolderName: string;
+  /**
+   * Todos los segmentos del path extraidos de `info.name`.
+   * Ej: "AutomationCorebank: Creditos\Reprogramacion\Rural"
+   *   → ["Creditos", "Reprogramacion", "Rural"]
+   * Para el fallback por nombre de carpeta: ["Categoria", "Producto"].
+   */
+  tags: string[];
 }

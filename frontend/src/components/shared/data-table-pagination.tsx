@@ -1,5 +1,5 @@
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 interface DataTablePaginationProps {
   total: number;
@@ -9,9 +9,9 @@ interface DataTablePaginationProps {
 }
 
 export function DataTablePagination({ total, page, pageSize, onPageChange }: DataTablePaginationProps) {
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
-  const canPrev = page > 0;
-  const canNext = page < totalPages - 1;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize))
+  const canPrev = page > 0
+  const canNext = page < totalPages - 1
 
   return (
     <div className="flex items-center justify-between px-2">
@@ -38,5 +38,5 @@ export function DataTablePagination({ total, page, pageSize, onPageChange }: Dat
         </div>
       </div>
     </div>
-  );
+  )
 }
