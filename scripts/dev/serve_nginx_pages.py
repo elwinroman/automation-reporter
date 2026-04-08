@@ -39,12 +39,13 @@ def resolve_reports_root(cli_root: str | None) -> Path:
     return Path(env_root).expanduser().resolve()
 
   repo_root = Path(__file__).resolve().parents[2]
-  dotenv_root = read_dotenv_value(repo_root / ".env", "LOGS_DIRECTORY")
-  if dotenv_root:
-    return Path(dotenv_root).expanduser().resolve()
+  for dotenv_path in (repo_root / "backend" / ".env", repo_root / ".env"):
+    dotenv_root = read_dotenv_value(dotenv_path, "LOGS_DIRECTORY")
+    if dotenv_root:
+      return Path(dotenv_root).expanduser().resolve()
 
   raise SystemExit(
-    "No se pudo resolver la carpeta de logs. Usa --root o define LOGS_DIRECTORY en el entorno o en .env.",
+    "No se pudo resolver la carpeta de logs. Usa --root o define LOGS_DIRECTORY en el entorno o en backend/.env.",
   )
 
 

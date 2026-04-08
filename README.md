@@ -21,15 +21,16 @@ Sistema completo para generar y visualizar reportes estadisticos de pruebas de a
 ## Instalacion
 
 ```bash
-pnpm install
-cp .env.sample .env
+cd backend && pnpm install
+cd ../frontend && pnpm install
+cd ../backend && cp .env.sample .env
 ```
 
 ## Configuracion
 
 `LOGS_DIRECTORY` debe apuntar a una carpeta que contenga logs de TestComplete organizados por version.
 
-Crear un archivo `.env` en la raiz, o copiar `.env.sample`:
+Crear un archivo `backend/.env`, o copiar `backend/.env.sample`:
 
 ```env
 LOGS_DIRECTORY=./logs
@@ -39,7 +40,7 @@ LOGS_DIRECTORY=./logs
 |---|---|---|
 | `LOGS_DIRECTORY` | Si | Ruta al directorio raiz que contiene los logs de TestComplete |
 
-Las variables se validan al iniciar con Zod en `src/core/environment.ts`. Si falta alguna, el proceso termina con un mensaje de error claro.
+Las variables se validan al iniciar con Zod en `backend/src/core/environment.ts`. Si falta alguna, el proceso termina con un mensaje de error claro.
 
 ## Uso
 
@@ -49,6 +50,7 @@ La entrada esperada por el CLI son archivos `summary.xml` generados por TestComp
 
 ```bash
 # Usa LOGS_DIRECTORY del .env
+cd backend
 pnpm dev generate
 
 # O pasar directorio explicitamente
@@ -70,6 +72,7 @@ El servidor expone reportes construidos especificamente a partir de logs de Test
 
 ```bash
 # Desarrollo
+cd backend
 pnpm dev:server
 pnpm dev:server -- --port 4000 --host 0.0.0.0
 
@@ -146,7 +149,7 @@ curl "http://localhost:3000/report.failureAnalysis?input=%7B%22version%22%3A%22v
 ### Integracion con frontend
 
 ```ts
-import type { AppRouter } from 'automation-reporter/infrastructure/trpc';
+import type { AppRouter } from '@backend/infrastructure/trpc/router.js';
 import { createTRPCClient, httpBatchLink } from '@trpc/client';
 
 const trpc = createTRPCClient<AppRouter>({
@@ -203,14 +206,15 @@ Dentro de cada version, el CLI busca recursivamente todos los `summary.xml` de T
 ### Backend
 
 ```text
-src/
-  core/
-  domain/
-  application/
-  infrastructure/
-    adapters/
-    cli/
-    trpc/
+backend/
+  src/
+    core/
+    domain/
+    application/
+    infrastructure/
+      adapters/
+      cli/
+      trpc/
 ```
 
 Las capas `domain` y `application` no dependen de `infrastructure`.
@@ -236,10 +240,10 @@ Aplicacion React para visualizar los reportes de forma interactiva.
 
 ```bash
 # Terminal 1
-pnpm dev:server
+cd backend && pnpm dev:server
 
 # Terminal 2
-pnpm --dir frontend dev
+cd frontend && pnpm dev
 ```
 
 Disponible en `http://localhost:5173`.
@@ -256,12 +260,12 @@ Disponible en `http://localhost:5173`.
 
 | Script | Descripcion |
 |---|---|
-| `pnpm dev` | Ejecuta CLI en modo desarrollo |
-| `pnpm dev:server` | Inicia servidor tRPC en desarrollo |
-| `pnpm --dir frontend dev` | Inicia frontend en desarrollo |
-| `pnpm build` | Compila TypeScript backend a `dist/` |
-| `pnpm start` | Ejecuta CLI compilado |
-| `pnpm start:server` | Inicia servidor tRPC compilado |
+| `cd backend && pnpm dev` | Ejecuta CLI en modo desarrollo |
+| `cd backend && pnpm dev:server` | Inicia servidor tRPC en desarrollo |
+| `cd frontend && pnpm dev` | Inicia frontend en desarrollo |
+| `cd backend && pnpm build` | Compila TypeScript backend a `backend/dist/` |
+| `cd backend && pnpm start` | Ejecuta CLI compilado |
+| `cd backend && pnpm start:server` | Inicia servidor tRPC compilado |
 
 ## Tech stack
 

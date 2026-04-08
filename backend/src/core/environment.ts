@@ -1,5 +1,18 @@
-import 'dotenv/config'
+import { existsSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import dotenv from 'dotenv'
 import { z } from 'zod'
+
+const currentDir = dirname(fileURLToPath(import.meta.url))
+const backendRoot = resolve(currentDir, '../..')
+const workspaceRoot = resolve(backendRoot, '..')
+
+for (const envPath of [resolve(backendRoot, '.env'), resolve(workspaceRoot, '.env')]) {
+  if (existsSync(envPath)) {
+    dotenv.config({ path: envPath })
+  }
+}
 
 const envSchema = z.object({
   LOGS_DIRECTORY: z.string().min(1, 'LOGS_DIRECTORY is required'),

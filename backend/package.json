@@ -1,5 +1,5 @@
 {
-  "name": "automation-reporter",
+  "name": "automation-reporter-backend",
   "version": "1.0.0",
   "description": "CLI para generar reportes estadísticos de logs de automatización JUnit",
   "type": "module",

@@ -28,18 +28,19 @@ Las siguientes skills estan disponibles y se cargan automaticamente:
 ## Estructura del Proyecto
 
 ```text
-src/
-|-- domain/          # Entidades y logica de negocio
-|-- application/     # Casos de uso
-|-- infrastructure/  # Implementaciones concretas (CLI, tRPC, filesystem)
-`-- shared/          # Utilidades compartidas
+backend/
+|-- src/
+|   |-- domain/          # Entidades y logica de negocio
+|   |-- application/     # Casos de uso
+|   `-- infrastructure/  # Implementaciones concretas (CLI, tRPC, filesystem)
+`-- package.json
 
-frontend/            # Aplicacion React con cliente tRPC
+frontend/                # Aplicacion React con cliente tRPC
 ```
 
 ## Comandos
 
-- `pnpm build`: Compilar el proyecto
-- `pnpm dev`: Ejecutar en modo desarrollo
-- `pnpm serve`: Iniciar servidor tRPC (puerto 3000)
-- `pnpm frontend:dev`: Iniciar frontend de desarrollo (puerto 5173)
+- `cd backend && pnpm build`: Compilar backend
+- `cd backend && pnpm dev`: Ejecutar backend en modo desarrollo
+- `cd backend && pnpm dev:server`: Iniciar servidor tRPC (puerto 3000)
+- `cd frontend && pnpm dev`: Iniciar frontend de desarrollo (puerto 5173)
