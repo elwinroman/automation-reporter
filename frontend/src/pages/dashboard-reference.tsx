@@ -86,7 +86,8 @@ export default function DashboardReference() {
             </p>
             <p className="text-muted-foreground">
               Se ejecutaron <span className="text-primary">{formatNumber(s.totalExecutions)} ejecuciones E2E</span> con{' '}
-              <span className="text-primary">{formatNumber(s.totalTestCases)} casos de prueba</span> en{' '}
+              <span className="text-primary">{formatNumber(s.uniqueTestCases)} casos de prueba unicos</span> y{' '}
+              <span className="text-primary">{formatNumber(s.totalTestCases)} ejecuciones de test case</span> en{' '}
               <span className="text-primary">{formatTime(s.totalTime)}</span>.
             </p>
             {s.totalFailed > 0 && (
@@ -98,7 +99,8 @@ export default function DashboardReference() {
 
       <section className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-8">
         <KpiCard title="E2E Execs" value={formatNumber(s.totalExecutions)} color="gray" />
-        <KpiCard title="Test Cases" value={formatNumber(s.totalTestCases)} color="gray" />
+        <KpiCard title="Unique Cases" value={formatNumber(s.uniqueTestCases)} color="gray" />
+        <KpiCard title="Case Runs" value={formatNumber(s.totalTestCases)} color="gray" />
         <KpiCard title="Success" value={formatNumber(s.totalPassed)} color="blue" />
         <KpiCard title="Failed" value={formatNumber(s.totalFailed)} color="red" />
         <KpiCard title="Rate" value={formatPassRate(s.globalPassRate)} color="blue" />

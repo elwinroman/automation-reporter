@@ -37,6 +37,7 @@ export function assembleReport(
 }
 
 function buildGlobalSummary(executions: TestExecution[]): GlobalSummary {
+  const uniqueTestCaseNames = new Set<string>()
   let totalTestCases = 0
   let totalPassed = 0
   let totalFailed = 0
@@ -47,6 +48,7 @@ function buildGlobalSummary(executions: TestExecution[]): GlobalSummary {
   for (const exec of executions) {
     for (const suite of exec.suites) {
       for (const tc of suite.testCases) {
+        uniqueTestCaseNames.add(tc.name)
         totalTestCases++
         if (tc.status === 'passed') totalPassed++
         else totalFailed++
@@ -60,6 +62,7 @@ function buildGlobalSummary(executions: TestExecution[]): GlobalSummary {
 
   return {
     totalExecutions: executions.length,
+    uniqueTestCases: uniqueTestCaseNames.size,
     totalTestCases,
     totalPassed,
     totalFailed,

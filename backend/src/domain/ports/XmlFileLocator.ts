@@ -1,5 +1,5 @@
-/** Puerto para localizar archivos summary.xml en el filesystem. */
+/** Puerto para localizar archivos fuente de reporte en el filesystem. */
 export interface XmlFileLocator {
-  /** Busca recursivamente archivos `summary.xml` dentro del directorio dado. */
+  /** Busca recursivamente archivos de entrada soportados (`summary.xml` o `_root.js`). */
   findSummaryFiles(directory: string): Promise<string[]>;
 }

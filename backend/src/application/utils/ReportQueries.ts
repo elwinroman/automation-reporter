@@ -164,6 +164,7 @@ export function queryGlobalSummary(
     isInDateRange(new Date(exec.metadata.executionDate.toString()), filters.dateRange),
   )
 
+  const uniqueTestCaseNames = new Set<string>()
   let totalTestCases = 0
   let totalPassed = 0
   let totalFailed = 0
@@ -172,6 +173,7 @@ export function queryGlobalSummary(
   for (const exec of filteredExecutions) {
     for (const suite of exec.suites) {
       for (const tc of suite.testCases) {
+        uniqueTestCaseNames.add(tc.name)
         totalTestCases++
         if (tc.status === 'passed') totalPassed++
         else totalFailed++
@@ -186,6 +188,7 @@ export function queryGlobalSummary(
 
   return {
     totalExecutions: filteredExecutions.length,
+    uniqueTestCases: uniqueTestCaseNames.size,
     totalTestCases,
     totalPassed,
     totalFailed,

@@ -12,6 +12,6 @@ export interface ParsedTestSuites {
 
 /** Puerto para parsear contenido XML JUnit a objetos de dominio. */
 export interface XmlParser {
-  /** Parsea el contenido XML de un summary.xml y retorna las suites con sus test cases. */
-  parse(xmlContent: string): ParsedTestSuites;
+  /** Parsea el contenido de una fuente de reporte y retorna las suites con sus test cases. */
+  parse(content: string, sourcePath: string): Promise<ParsedTestSuites>;
 }

@@ -10,6 +10,9 @@ export interface ReportMetadata {
 /** Resumen global de todas las ejecuciones procesadas. */
 export interface GlobalSummary {
   totalExecutions: number;
+  /** Cantidad de test cases unicos por nombre. */
+  uniqueTestCases: number;
+  /** Cantidad total de ejecuciones de test case, incluyendo repetidos entre corridas. */
   totalTestCases: number;
   totalPassed: number;
   totalFailed: number;

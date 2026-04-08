@@ -4,7 +4,7 @@
 
 Este proyecto esta orientado especificamente a procesar logs de TestComplete exportados en formato JUnit (`summary.xml`).
 
-La fuente de datos esperada en toda la aplicacion son ejecuciones de TestComplete exportadas como `summary.xml`.
+La fuente de datos esperada en toda la aplicacion son ejecuciones de TestComplete exportadas como `summary.xml` o como reportes HTML legacy con `_root.js`.
 
 Sistema completo para generar y visualizar reportes estadisticos de pruebas de automatizacion a partir de logs de TestComplete en formato JUnit.
 
@@ -46,7 +46,7 @@ Las variables se validan al iniciar con Zod en `backend/src/core/environment.ts`
 
 ### CLI: Generar reporte JSON
 
-La entrada esperada por el CLI son archivos `summary.xml` generados por TestComplete.
+La entrada esperada por el CLI son archivos `summary.xml` o reportes HTML legacy (`_root.js`, `_TestLog.js`) generados por TestComplete.
 
 ```bash
 # Usa LOGS_DIRECTORY del .env

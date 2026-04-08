@@ -14,9 +14,9 @@ export interface GenerateReportDeps {
 /**
  * Caso de uso principal: genera un reporte agregado.
  *
- * Flujo: localiza XMLs -> parsea cada uno -> extrae metadata de carpeta -> ensambla reporte -> exporta.
+ * Flujo: localiza fuentes de reporte -> parsea cada una -> extrae metadata de carpeta -> ensambla reporte -> exporta.
  *
- * @throws Error si no se encuentran archivos summary.xml en el directorio.
+ * @throws Error si no se encuentran fuentes de reporte soportadas en el directorio.
  */
 export async function generateReport(
   sourceDirectory: string,
@@ -27,16 +27,16 @@ export async function generateReport(
   const files = await deps.xmlFileLocator.findSummaryFiles(sourceDirectory)
 
   if (files.length === 0) {
-    throw new Error(`No se encontraron archivos summary.xml en: ${sourceDirectory}`)
+    throw new Error(`No se encontraron archivos summary.xml ni _root.js en: ${sourceDirectory}`)
   }
 
-  console.log(`Encontrados ${files.length} archivos summary.xml`)
+  console.log(`Encontradas ${files.length} fuentes de reporte`)
 
   const executions: TestExecution[] = []
 
   for (const filePath of files) {
     const xmlContent = await fs.readFile(filePath, 'utf-8')
-    const parsed = deps.xmlParser.parse(xmlContent)
+    const parsed = await deps.xmlParser.parse(xmlContent, filePath)
     const metadata = await extractFolderMetadata(filePath)
 
     executions.push({
