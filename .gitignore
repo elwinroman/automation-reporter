@@ -6,6 +6,8 @@ output/
 *.tsbuildinfo
 logs/
 .env
+.env.docker
+frontend/.env
 .venv/
 frontend/.tmp/
 skills/

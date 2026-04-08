@@ -130,13 +130,17 @@ export function startServer(options: ServerOptions): void {
     },
   })
 
-  const server = createServer((req, res) => {
+  const server = createServer(async(req, res) => {
     applyCorsHeaders(req, res, allowedOrigins)
 
     // Responder preflights aquí — tRPC no los maneja y devolvería un status no-2xx
     if (req.method === 'OPTIONS') {
       res.writeHead(204)
       res.end()
+      return
+    }
+
+    if (await serveFile(req, res, allowedOrigins)) {
       return
     }
 

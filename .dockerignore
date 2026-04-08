@@ -1,0 +1,10 @@
+.git
+.gitignore
+.venv
+.vscode
+**/node_modules
+**/dist
+**/.tmp
+**/*.tsbuildinfo
+frontend/.env.local
+backend/.env

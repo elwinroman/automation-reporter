@@ -51,17 +51,17 @@ La entrada esperada por el CLI son archivos `summary.xml` o reportes HTML legacy
 ```bash
 # Usa LOGS_DIRECTORY del .env
 cd backend
-pnpm dev generate
+pnpm dev:cli generate
 
 # O pasar directorio explicitamente
-pnpm dev generate ./otra/ruta/logs
+pnpm dev:cli generate ./otra/ruta/logs
 
 # Con ruta de salida personalizada
-pnpm dev generate -o ./output/mi-reporte.json
+pnpm dev:cli generate -o ./output/mi-reporte.json
 
 # Produccion
 pnpm build
-pnpm start generate
+pnpm start:cli generate
 ```
 
 Esto busca recursivamente archivos `summary.xml` en el directorio indicado y genera un JSON con el reporte agregado.
@@ -79,7 +79,10 @@ pnpm dev:server -- --port 4000 --host 0.0.0.0
 # Produccion
 pnpm build
 pnpm start:server
+pnpm start:server:network
 ```
+
+Usa `--host 0.0.0.0` o `pnpm start:server:network` cuando necesites que otras maquinas de la red puedan acceder al backend.
 
 El flujo es:
 
@@ -248,6 +251,16 @@ cd frontend && pnpm dev
 
 Disponible en `http://localhost:5173`.
 
+Para probar desde otra maquina en la red:
+
+```bash
+# Terminal 1
+cd backend && pnpm dev:server:network
+
+# Terminal 2
+cd frontend && pnpm dev:network
+```
+
 ### Caracteristicas
 
 - Selector de version
@@ -260,12 +273,98 @@ Disponible en `http://localhost:5173`.
 
 | Script | Descripcion |
 |---|---|
-| `cd backend && pnpm dev` | Ejecuta CLI en modo desarrollo |
+| `cd backend && pnpm dev:cli` | Ejecuta el CLI en modo desarrollo |
 | `cd backend && pnpm dev:server` | Inicia servidor tRPC en desarrollo |
+| `cd backend && pnpm dev:server:network` | Inicia servidor tRPC escuchando en la red local |
 | `cd frontend && pnpm dev` | Inicia frontend en desarrollo |
+| `cd frontend && pnpm dev:network` | Inicia frontend Vite escuchando en la red local |
 | `cd backend && pnpm build` | Compila TypeScript backend a `backend/dist/` |
-| `cd backend && pnpm start` | Ejecuta CLI compilado |
+| `cd backend && pnpm start:cli` | Ejecuta el CLI compilado |
 | `cd backend && pnpm start:server` | Inicia servidor tRPC compilado |
+| `cd backend && pnpm start:server:network` | Inicia servidor tRPC compilado escuchando en la red local |
+| `cd frontend && pnpm preview` | Sirve el frontend compilado solo en localhost |
+| `cd frontend && pnpm preview:network` | Sirve el frontend compilado escuchando en la red local |
+
+## Docker
+
+Se incluye una orquestacion base con Docker Compose para desplegar frontend y backend juntos.
+
+### Archivos
+
+- `docker-compose.yml`
+- `backend/Dockerfile`
+- `frontend/Dockerfile`
+- `frontend/nginx.conf`
+- `.env.docker.sample`
+
+### Configuracion
+
+1. Crear un archivo `.env` en la raiz a partir de `.env.docker.sample`.
+2. Ajustar `LOGS_HOST_PATH` para apuntar a la carpeta real de logs en tu maquina o servidor.
+
+Variables principales:
+
+| Variable | Descripcion | Default |
+|---|---|---|
+| `BACKEND_PORT` | Puerto externo del backend | `3000` |
+| `FRONTEND_PORT` | Puerto externo del frontend | `8080` |
+| `LOGS_HOST_PATH` | Carpeta de logs montada desde el host | `./logs` |
+| `BACKEND_LOGS_DIRECTORY` | Ruta interna usada por el backend dentro del contenedor | `/data/logs` |
+| `VITE_TRPC_URL` | URL base usada por el frontend para tRPC | `/` |
+| `VITE_REPORTS_BASE_URL` | Base URL publica de los reportes HTML servidos por un nginx externo | `http://localhost:9001` |
+
+### Levantar servicios
+
+```bash
+docker compose --env-file .env up --build -d
+```
+
+Antes de levantar:
+
+- ajusta `VITE_REPORTS_BASE_URL` con la URL publica real donde tu nginx del servidor publica los reportes HTML
+- si el frontend sera consumido desde otras maquinas, evita `localhost` y usa el host o IP reales del servidor en esa variable
+
+### Script de setup
+
+Se incluyen scripts bash simples para preparar entorno y desplegar con Docker Compose:
+
+```bash
+bash setup/00_generate_environment.sh
+```
+
+Esto genera, si no existen:
+
+- `.env.docker`
+
+Luego editar los valores necesarios y desplegar:
+
+```bash
+bash setup/01_build_and_deploy.sh
+```
+
+Con override de version:
+
+```bash
+bash setup/01_build_and_deploy.sh 2.1.0
+```
+
+### Detener servicios
+
+```bash
+docker compose --env-file .env down
+```
+
+### Acceso
+
+- Frontend: `http://localhost:8080`
+- Backend: `http://localhost:3000`
+
+En esta configuracion:
+
+- nginx sirve la SPA del frontend
+- nginx proxya las rutas `report.*` al backend
+- el backend lee los logs desde `LOGS_HOST_PATH` mediante un mount read-only
+- los reportes HTML se sirven fuera del stack, desde un nginx externo configurado en `VITE_REPORTS_BASE_URL`
 
 ## Tech stack
 

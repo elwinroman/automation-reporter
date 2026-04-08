@@ -8,11 +8,11 @@
     "automation-reporter": "dist/index.js"
   },
   "scripts": {
-    "dev": "tsx src/index.ts",
+    "dev:cli": "tsx src/index.ts",
     "dev:server": "tsx src/index.ts serve",
     "dev:server:network": "tsx src/index.ts serve --host 0.0.0.0",
     "build": "tsc -p tsconfig.build.json",
-    "start": "node dist/index.js",
+    "start:cli": "node dist/index.js",
     "start:server": "node dist/index.js serve",
     "start:server:network": "node dist/index.js serve --host 0.0.0.0"
   },

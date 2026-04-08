@@ -65,12 +65,12 @@ Ejemplo de salida:
 ```text
 Serving reports from: D:\shared\Pruebas
 Base URL: http://127.0.0.1:8082
-Usa esta base en frontend/.env.local como VITE_REPORTS_BASE_URL.
+Usa esta base en frontend/.env como VITE_REPORTS_BASE_URL.
 ```
 
 ## Configuracion del frontend
 
-Crear `frontend/.env.local`:
+Crear `frontend/.env`:
 
 ```env
 VITE_REPORTS_BASE_URL=http://127.0.0.1:8082

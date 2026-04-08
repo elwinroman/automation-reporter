@@ -1,0 +1,28 @@
+services:
+  backend:
+    image: automation-reporter-backend:${APP_VERSION:-latest}
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      LOGS_DIRECTORY: ${BACKEND_LOGS_DIRECTORY:-/data/logs}
+      ALLOWED_URLS: ${ALLOWED_URLS:-}
+    volumes:
+      - ${LOGS_HOST_PATH:-./logs}:${BACKEND_LOGS_DIRECTORY:-/data/logs}:ro
+    ports:
+      - "${BACKEND_PORT:-3000}:3000"
+    restart: unless-stopped
+
+  frontend:
+    image: automation-reporter-frontend:${APP_VERSION:-latest}
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        VITE_TRPC_URL: ${VITE_TRPC_URL:-/}
+        VITE_REPORTS_BASE_URL: ${VITE_REPORTS_BASE_URL:-http://localhost:9001}
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-8080}:80"
+    restart: unless-stopped
