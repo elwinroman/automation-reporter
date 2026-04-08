@@ -58,9 +58,6 @@ export const productDetailInputSchema = z.object({
 
 export const flakyTestsInputSchema = z.object({
   version: z.string().min(1),
-  maxPassRate: z.number().min(0).max(100).default(100),
-  minPassRate: z.number().min(0).max(100).default(0),
-  minExecutions: z.number().int().min(1).default(2),
   pagination: paginationSchema.default({ limit: 50, offset: 0 }),
   sortBy: z.object({
     field: z.enum(['testCaseName', 'passRate', 'executionCount', 'failCount']).default('passRate'),

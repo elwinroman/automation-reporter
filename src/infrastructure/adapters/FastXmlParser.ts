@@ -35,6 +35,17 @@ interface RawTestSuites {
   testsuite?: RawTestSuite[];
 }
 
+function decodeXmlEntities(value: string): string {
+  return value
+    .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, code) => String.fromCodePoint(parseInt(code, 16)))
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, '\'')
+}
+
 /**
  * Implementacion de {@link XmlParser} usando fast-xml-parser.
  * Mapea la estructura JUnit XML (`<testsuites>` -> `<testsuite>` -> `<testcase>`) a entidades de dominio.
@@ -59,7 +70,7 @@ export class FastXmlParserAdapter implements XmlParser {
     const suites: TestSuite[] = (raw.testsuite ?? []).map((rs) => this.mapSuite(rs))
 
     return {
-      name: raw['@_name'],
+      name: decodeXmlEntities(raw['@_name']),
       tests: parseInt(raw['@_tests']),
       failures: parseInt(raw['@_failures']),
       errors: parseInt(raw['@_errors']),
@@ -72,7 +83,7 @@ export class FastXmlParserAdapter implements XmlParser {
     const testCases: TestCase[] = (raw.testcase ?? []).map((rtc) => this.mapTestCase(rtc))
 
     return {
-      name: raw['@_name'],
+      name: decodeXmlEntities(raw['@_name']),
       tests: parseInt(raw['@_tests']),
       failures: parseInt(raw['@_failures']),
       errors: parseInt(raw['@_errors']),
@@ -86,12 +97,12 @@ export class FastXmlParserAdapter implements XmlParser {
   private mapTestCase(raw: RawTestCase): TestCase {
     const failures = raw.failure ?? []
     const failureMessages = failures
-      .map((f) => f['@_message'] ?? '')
+      .map((f) => decodeXmlEntities(f['@_message'] ?? ''))
       .filter((msg) => msg.length > 0)
 
     return {
-      name: raw['@_name'],
-      classname: raw['@_classname'],
+      name: decodeXmlEntities(raw['@_name']),
+      classname: decodeXmlEntities(raw['@_classname']),
       time: parseFloat(raw['@_time']),
       status: failures.length > 0 ? 'failed' : 'passed',
       failureMessages,

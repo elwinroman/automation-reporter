@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { useNavigate } from 'react-router'
 import { trpc } from '@/lib/trpc'
 import { useVersion } from '@/context/version-context'
 import { formatTime, formatNumber } from '@/lib/format'
@@ -25,8 +26,37 @@ interface TestCaseRow {
   products: string[];
 }
 
+function ProductBadges({
+  products,
+  onSelectProduct,
+}: {
+  products: string[];
+  onSelectProduct: (product: string) => void;
+}) {
+  const unique = [...new Set(products)]
+  if (unique.length === 0) return null
+  return (
+    <div className="flex flex-wrap gap-1">
+      {unique.map((product) => (
+        <button
+          type="button"
+          key={product}
+          onClick={(e) => {
+            e.stopPropagation()
+            onSelectProduct(product)
+          }}
+          className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-200 transition-colors hover:bg-slate-200 hover:text-slate-900"
+        >
+          {product}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 export default function TestCases() {
   const { version } = useVersion()
+  const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [statusType, setStatusType] = useState<StatusType>('all')
   const debouncedSearch = useDebouncedValue(search)
@@ -54,6 +84,16 @@ export default function TestCases() {
 
   const columns: Column<TestCaseRow>[] = [
     { key: 'testCaseName', header: 'Test Case', sortable: true, render: (r) => <span className="truncate max-w-[300px] block">{r.testCaseName}</span> },
+    {
+      key: 'products',
+      header: 'Products',
+      render: (r) => (
+        <ProductBadges
+          products={r.products}
+          onSelectProduct={(product) => navigate(`/products/${encodeURIComponent(product)}`)}
+        />
+      ),
+    },
     { key: 'executionCount', header: 'Runs', sortable: true, className: 'text-right', render: (r) => formatNumber(r.executionCount) },
     { key: 'passCount', header: 'Passed', sortable: true, className: 'text-right', render: (r) => r.passCount },
     { key: 'failCount', header: 'Failed', sortable: true, className: 'text-right', render: (r) => r.failCount },
@@ -68,8 +108,11 @@ export default function TestCases() {
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Test Cases" description="Aggregated test case results across all executions" />
-      <div className="flex flex-col sm:flex-row gap-4">
+      <PageHeader
+        title="Test Cases"
+        description="Resultados agregados por caso de prueba, con acceso directo a los productos relacionados"
+      />
+      <div className="flex flex-col gap-4">
         <Tabs value={statusType} onValueChange={(v) => { setStatusType(v as StatusType); pagination.resetPage() }}>
           <TabsList>
             <TabsTrigger value="all">All</TabsTrigger>

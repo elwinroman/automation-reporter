@@ -86,9 +86,6 @@ export interface TestCasesFilters {
 }
 
 export interface FlakyTestsFilters {
-  minPassRate?: number;
-  maxPassRate?: number;
-  minExecutions?: number;
   pagination?: PaginationConfig;
   sortBy?: SortConfig;
 }
@@ -324,16 +321,10 @@ export function queryFlakyTests(
   report: AggregatedReport,
   filters?: FlakyTestsFilters,
 ): PaginatedResult<AggregatedTestCase> {
-  const minPassRate = filters?.minPassRate ?? 0
-  const maxPassRate = filters?.maxPassRate ?? 100
-  const minExecs = filters?.minExecutions ?? 2
-
   let result = report.testCases.filter((tc) =>
-    tc.passRate > minPassRate &&
-    tc.passRate < maxPassRate &&
     tc.passRate > 0 &&
     tc.passRate < 100 &&
-    tc.executionCount >= minExecs,
+    tc.executionCount >= 2,
   )
 
   const field = filters?.sortBy?.field ?? 'passRate'

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router'
 import { trpc } from '@/lib/trpc'
 import { useVersion } from '@/context/version-context'
 import { formatNumber } from '@/lib/format'
@@ -10,6 +11,7 @@ import { ErrorFallback } from '@/components/shared/error-fallback'
 import { Badge } from '@/components/ui/badge'
 import { Tooltip } from '@/components/ui/tooltip'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { usePagination } from '@/hooks/use-pagination'
 
@@ -21,6 +23,7 @@ interface FailureRow {
 }
 
 export default function FailureAnalysis() {
+  const navigate = useNavigate()
   const { version } = useVersion()
   const [search, setSearch] = useState('')
   const [minOccurrences, setMinOccurrences] = useState(1)
@@ -41,10 +44,20 @@ export default function FailureAnalysis() {
       key: 'message',
       header: 'Error Message',
       render: (r) => (
-        <Tooltip content={r.message}>
-          <span className="truncate max-w-[400px] block text-xs font-mono">
-            {r.message.length > 80 ? r.message.slice(0, 80) + '...' : r.message}
-          </span>
+        <Tooltip content={<div className="max-w-lg whitespace-pre-wrap break-words text-xs leading-5">{r.message}</div>}>
+          <div
+            title={r.message}
+            className="max-w-[460px] rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs leading-5 text-slate-700"
+            style={{
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+              wordBreak: 'break-word',
+            }}
+          >
+            {r.message}
+          </div>
         </Tooltip>
       ),
     },
@@ -52,7 +65,7 @@ export default function FailureAnalysis() {
     {
       key: 'affectedTests', header: 'Affected Tests', className: 'text-right',
       render: (r) => (
-        <Tooltip content={<div className="space-y-1">{r.affectedTests.slice(0, 10).map((t) => <div key={t} className="text-xs">{t}</div>)}{r.affectedTests.length > 10 && <div className="text-xs">...and {r.affectedTests.length - 10} more</div>}</div>}>
+        <Tooltip content={<div className="max-w-sm space-y-1">{r.affectedTests.slice(0, 10).map((t) => <div key={t} className="text-xs break-words">{t}</div>)}{r.affectedTests.length > 10 && <div className="text-xs">...and {r.affectedTests.length - 10} more</div>}</div>}>
           <Badge variant="secondary">{r.affectedTests.length}</Badge>
         </Tooltip>
       ),
@@ -61,10 +74,15 @@ export default function FailureAnalysis() {
       key: 'affectedProducts', header: 'Affected Products',
       render: (r) => (
         <div className="flex flex-wrap gap-1">
-          {r.affectedProducts.slice(0, 3).map((p) => (
-            <Badge key={p} variant="outline" className="text-xs">{p}</Badge>
+          {r.affectedProducts.map((p) => (
+            <button
+              key={p}
+              type="button"
+              onClick={() => navigate(`/products/${encodeURIComponent(p)}`)}
+            >
+              <Badge variant="outline" className="text-xs hover:bg-slate-100 cursor-pointer">{p}</Badge>
+            </button>
           ))}
-          {r.affectedProducts.length > 3 && <Badge variant="outline" className="text-xs">+{r.affectedProducts.length - 3}</Badge>}
         </div>
       ),
     },
@@ -77,7 +95,7 @@ export default function FailureAnalysis() {
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Failure Analysis" description="Failures grouped by error message" />
+      <PageHeader title="Failure Analysis" description="Fallos agrupados por mensaje, con acceso directo a los productos afectados" />
       <div className="flex flex-wrap gap-3 items-end">
         <div>
           <label className="text-xs text-muted-foreground">Min Occurrences</label>
@@ -91,6 +109,28 @@ export default function FailureAnalysis() {
           className="w-48"
         />
         <SearchInput value={search} onChange={(v) => { setSearch(v); pagination.resetPage() }} placeholder="Search error messages..." className="max-w-sm" />
+      </div>
+      <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
+        {product ? (
+          <>
+            <span>Filtro activo:</span>
+            <Badge variant="secondary">{product}</Badge>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 text-slate-600"
+              onClick={() => {
+                setProduct('')
+                pagination.resetPage()
+              }}
+            >
+              Limpiar filtro
+            </Button>
+          </>
+        ) : (
+          <span>Pasa el mouse sobre el mensaje o el conteo de tests para ver más detalle, y usa los badges para ir al producto afectado.</span>
+        )}
       </div>
       <DataTable
         columns={columns}

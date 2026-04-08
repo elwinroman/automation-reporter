@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+﻿import { useState, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 import { trpc } from '@/lib/trpc'
 import { useVersion } from '@/context/version-context'
@@ -12,15 +12,17 @@ import { ErrorFallback } from '@/components/shared/error-fallback'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { usePagination } from '@/hooks/use-pagination'
 import { Select } from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 
-type SortField = 'product' | 'category' | 'executionCount' | 'passRate';
+type SortField = 'product' | 'category' | 'executionCount' | 'passRate'
 
 interface ProductRow {
-  product: string;
-  category: string;
-  executionCount: number;
-  passRate: number;
-  tags: string[];
+  product: string
+  category: string
+  executionCount: number
+  passRate: number
+  tags: string[]
 }
 
 function SubPathBadges({ tags }: { tags: string[] }) {
@@ -71,11 +73,11 @@ export default function Products() {
   }, [pagination])
 
   const columns: Column<ProductRow>[] = [
-    { key: 'product', header: 'Product', sortable: true, render: (r) => r.product },
-    { key: 'category', header: 'Category', sortable: true, render: (r) => r.category },
-    { key: 'tags', header: 'Sub-path', render: (r) => <SubPathBadges tags={r.tags} /> },
+    { key: 'product', header: 'Producto', sortable: true, render: (r) => r.product },
+    { key: 'category', header: 'Categoría', sortable: true, render: (r) => r.category },
+    { key: 'tags', header: 'Subruta', render: (r) => <SubPathBadges tags={r.tags} /> },
     { key: 'executionCount', header: 'Nro ejecuciones', sortable: true, className: 'text-right', render: (r) => formatNumber(r.executionCount) },
-    { key: 'passRate', header: 'Pass Rate', sortable: true, className: 'text-right', render: (r) => <PassRateBadge rate={r.passRate} /> },
+    { key: 'passRate', header: 'Tasa de éxito', sortable: true, className: 'text-right', render: (r) => <PassRateBadge rate={r.passRate} /> },
   ]
 
   if (query.isLoading) return <TableSkeleton />
@@ -88,7 +90,7 @@ export default function Products() {
     <div className="space-y-4">
       <PageHeader
         title="Products"
-        description={categoryFilter ? `Filtered by category: ${categoryFilter}` : 'Resultados agrupados por producto, con número de ejecuciones y pass rate'}
+        description={categoryFilter ? `Filtrado por categoría: ${categoryFilter}` : 'Resultados agrupados por producto, con número de ejecuciones y tasa de éxito'}
       />
       <div className="flex flex-wrap gap-3">
         <SearchInput value={search} onChange={(v) => { setSearch(v); pagination.resetPage() }} placeholder="Search products..." className="max-w-sm" />
@@ -106,6 +108,28 @@ export default function Products() {
             <option key={c.category} value={c.category}>{c.category}</option>
           ))}
         </Select>
+      </div>
+      <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
+        {categoryFilter ? (
+          <>
+            <span>Filtro activo:</span>
+            <Badge variant="secondary">{categoryFilter}</Badge>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 text-slate-600"
+              onClick={() => {
+                pagination.resetPage()
+                navigate('/products')
+              }}
+            >
+              Limpiar filtro
+            </Button>
+          </>
+        ) : (
+          <span>Usa el selector para enfocarte en una categoría específica sin salir del listado.</span>
+        )}
       </div>
       <DataTable
         columns={columns}
