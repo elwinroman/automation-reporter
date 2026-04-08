@@ -230,7 +230,7 @@ Aplicación React para visualizar los reportes de forma interactiva.
 pnpm dev:server
 
 # Terminal 2: Iniciar frontend en desarrollo
-pnpm frontend:dev
+pnpm --dir frontend dev
 ```
 
 El frontend estará disponible en http://localhost:5173
@@ -261,7 +261,7 @@ frontend/
 |---|---|
 | `pnpm dev` | Ejecuta CLI en modo desarrollo (tsx) |
 | `pnpm dev:server` | Inicia servidor tRPC en modo desarrollo (puerto 3000) |
-| `pnpm frontend:dev` | Inicia frontend en modo desarrollo (puerto 5173) |
+| `pnpm --dir frontend dev` | Inicia frontend en modo desarrollo (puerto 5173) |
 | `pnpm build` | Compila TypeScript backend a `dist/` |
 | `pnpm start` | Ejecuta CLI compilado |
 | `pnpm start:server` | Inicia servidor tRPC compilado |

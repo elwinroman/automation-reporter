@@ -4,4 +4,6 @@ output/
 *.tsbuildinfo
 logs/
 .env
+.venv/
+frontend/.tmp/
 skills/

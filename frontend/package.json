@@ -4,6 +4,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "nginx-pages:start": "python ..\\scripts\\dev\\nginx_pages_manager.py start",
+    "nginx-pages:stop": "powershell -ExecutionPolicy Bypass -File ..\\scripts\\dev\\stop_nginx_pages.ps1",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview"
