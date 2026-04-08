@@ -141,6 +141,14 @@ function isInDateRange(date: Date, range?: DateRange): boolean {
   return true
 }
 
+/** Normaliza texto para comparaciones insensibles a mayusculas y tildes. */
+function normalizeText(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+}
+
 // ── Query functions ─────────────────────────────────────────────
 
 /** Resumen global, opcionalmente filtrado por rango de fechas. */
@@ -200,8 +208,8 @@ export function queryCategories(
   let result = [...report.categories]
 
   if (filters?.category) {
-    const needle = filters.category.toLowerCase()
-    result = result.filter((c) => c.category.toLowerCase().includes(needle))
+    const needle = normalizeText(filters.category)
+    result = result.filter((c) => normalizeText(c.category).includes(needle))
   }
 
   const field = filters?.sortBy?.field ?? 'category'
@@ -217,8 +225,8 @@ export function queryProducts(
   let result = [...report.products]
 
   if (filters?.category) {
-    const cat = filters.category.toLowerCase()
-    result = result.filter((p) => p.category.toLowerCase() === cat)
+    const cat = normalizeText(filters.category)
+    result = result.filter((p) => normalizeText(p.category) === cat)
   }
 
   if (filters?.minPassRate !== undefined) {
@@ -236,8 +244,8 @@ export function queryProducts(
   }
 
   if (filters?.search) {
-    const needle = filters.search.toLowerCase()
-    result = result.filter((p) => p.product.toLowerCase().includes(needle))
+    const needle = normalizeText(filters.search)
+    result = result.filter((p) => normalizeText(p.product).includes(needle))
   }
 
   const field = filters?.sortBy?.field ?? 'product'
@@ -270,9 +278,9 @@ export function queryTestCases(
   }
 
   if (filters?.product) {
-    const prod = filters.product.toLowerCase()
+    const prod = normalizeText(filters.product)
     result = result.filter((tc) =>
-      tc.products.some((p) => p.toLowerCase() === prod),
+      tc.products.some((p) => normalizeText(p) === prod),
     )
   }
 
@@ -284,8 +292,8 @@ export function queryTestCases(
   }
 
   if (filters?.search) {
-    const needle = filters.search.toLowerCase()
-    result = result.filter((tc) => tc.testCaseName.toLowerCase().includes(needle))
+    const needle = normalizeText(filters.search)
+    result = result.filter((tc) => normalizeText(tc.testCaseName).includes(needle))
   }
 
   const field = filters?.sortBy?.field ?? 'executionCount'
@@ -303,14 +311,15 @@ export function queryProductDetail(
   report: AggregatedReport,
   productName: string,
 ): ProductDetailResult | null {
+  const normalizedProductName = normalizeText(productName)
   const product = report.products.find(
-    (p) => p.product.toLowerCase() === productName.toLowerCase(),
+    (p) => normalizeText(p.product) === normalizedProductName,
   )
 
   if (!product) return null
 
   const relatedTestCases = report.testCases.filter((tc) =>
-    tc.products.some((p) => p.toLowerCase() === productName.toLowerCase()),
+    tc.products.some((p) => normalizeText(p) === normalizedProductName),
   )
 
   return { ...product, relatedTestCases }
@@ -361,9 +370,9 @@ export function queryFailureAnalysis(
   let testCases = report.testCases
 
   if (filters?.product) {
-    const prod = filters.product.toLowerCase()
+    const prod = normalizeText(filters.product)
     testCases = testCases.filter((tc) =>
-      tc.products.some((p) => p.toLowerCase() === prod),
+      tc.products.some((p) => normalizeText(p) === prod),
     )
   }
 
@@ -393,8 +402,8 @@ export function queryFailureAnalysis(
   result = result.filter((fg) => fg.occurrences >= minOccurrences)
 
   if (filters?.search) {
-    const needle = filters.search.toLowerCase()
-    result = result.filter((fg) => fg.message.toLowerCase().includes(needle))
+    const needle = normalizeText(filters.search)
+    result = result.filter((fg) => normalizeText(fg.message).includes(needle))
   }
 
   result.sort((a, b) => b.occurrences - a.occurrences)

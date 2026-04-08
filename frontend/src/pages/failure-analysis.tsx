@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
+import { keepPreviousData } from '@tanstack/react-query'
 import { ArrowUpRight } from 'lucide-react'
 import { trpc } from '@/lib/trpc'
 import { useVersion } from '@/context/version-context'
@@ -32,13 +33,18 @@ export default function FailureAnalysis() {
   const debouncedSearch = useDebouncedValue(search)
   const pagination = usePagination({ pageSize: 20 })
 
-  const query = trpc.report.failureAnalysis.useQuery({
-    version: version!,
-    minOccurrences,
-    product: product || undefined,
-    search: debouncedSearch || undefined,
-    pagination: { limit: pagination.pageSize, offset: pagination.offset },
-  })
+  const query = trpc.report.failureAnalysis.useQuery(
+    {
+      version: version!,
+      minOccurrences,
+      product: product || undefined,
+      search: debouncedSearch || undefined,
+      pagination: { limit: pagination.pageSize, offset: pagination.offset },
+    },
+    {
+      placeholderData: keepPreviousData,
+    },
+  )
 
   const columns: Column<FailureRow>[] = [
     {
@@ -109,8 +115,8 @@ export default function FailureAnalysis() {
     },
   ]
 
-  if (query.isLoading) return <TableSkeleton />
-  if (query.isError) return <ErrorFallback message={query.error.message} onRetry={() => query.refetch()} />
+  if (query.isLoading && !query.data) return <TableSkeleton />
+  if (query.isError && !query.data) return <ErrorFallback message={query.error.message} onRetry={() => query.refetch()} />
 
   const result = query.data!
 

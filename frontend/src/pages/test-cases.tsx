@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router'
+import { keepPreviousData } from '@tanstack/react-query'
 import { ArrowUpRight } from 'lucide-react'
 import { trpc } from '@/lib/trpc'
 import { useVersion } from '@/context/version-context'
@@ -68,13 +69,18 @@ export default function TestCases() {
     direction: 'asc',
   })
 
-  const query = trpc.report.testCases.useQuery({
-    version: version!,
-    statusType,
-    search: debouncedSearch || undefined,
-    sortBy: sort,
-    pagination: { limit: pagination.pageSize, offset: pagination.offset },
-  })
+  const query = trpc.report.testCases.useQuery(
+    {
+      version: version!,
+      statusType,
+      search: debouncedSearch || undefined,
+      sortBy: sort,
+      pagination: { limit: pagination.pageSize, offset: pagination.offset },
+    },
+    {
+      placeholderData: keepPreviousData,
+    },
+  )
 
   const handleSort = useCallback((field: string) => {
     setSort((prev) => ({
@@ -103,8 +109,8 @@ export default function TestCases() {
     { key: 'avgTime', header: 'Tiempo prom.', sortable: true, className: 'text-right', render: (r) => formatTime(r.avgTime) },
   ]
 
-  if (query.isLoading) return <TableSkeleton />
-  if (query.isError) return <ErrorFallback message={query.error.message} onRetry={() => query.refetch()} />
+  if (query.isLoading && !query.data) return <TableSkeleton />
+  if (query.isError && !query.data) return <ErrorFallback message={query.error.message} onRetry={() => query.refetch()} />
 
   const result = query.data!
 

@@ -1,5 +1,6 @@
 ﻿import { useState, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
+import { keepPreviousData } from '@tanstack/react-query'
 import { trpc } from '@/lib/trpc'
 import { useVersion } from '@/context/version-context'
 import { formatNumber } from '@/lib/format'
@@ -56,13 +57,18 @@ export default function Products() {
   })
   const categoriesQuery = trpc.report.categories.useQuery({ version: version! })
 
-  const query = trpc.report.products.useQuery({
-    version: version!,
-    category: categoryFilter,
-    search: debouncedSearch || undefined,
-    sortBy: sort,
-    pagination: { limit: pagination.pageSize, offset: pagination.offset },
-  })
+  const query = trpc.report.products.useQuery(
+    {
+      version: version!,
+      category: categoryFilter,
+      search: debouncedSearch || undefined,
+      sortBy: sort,
+      pagination: { limit: pagination.pageSize, offset: pagination.offset },
+    },
+    {
+      placeholderData: keepPreviousData,
+    },
+  )
 
   const handleSort = useCallback((field: string) => {
     setSort((prev) => ({
@@ -80,8 +86,8 @@ export default function Products() {
     { key: 'passRate', header: 'Tasa de éxito', sortable: true, className: 'text-right', render: (r) => <PassRateBadge rate={r.passRate} /> },
   ]
 
-  if (query.isLoading) return <TableSkeleton />
-  if (query.isError) return <ErrorFallback message={query.error.message} onRetry={() => query.refetch()} />
+  if (query.isLoading && !query.data) return <TableSkeleton />
+  if (query.isError && !query.data) return <ErrorFallback message={query.error.message} onRetry={() => query.refetch()} />
 
   const result = query.data!
   const categories = categoriesQuery.data ?? []
