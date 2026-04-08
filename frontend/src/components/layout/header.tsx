@@ -4,10 +4,8 @@ import { useVersion } from '@/context/version-context'
 
 const routeNames: Record<string, string> = {
   '/dashboard': 'Dashboard',
-  '/categories': 'Categories',
   '/products': 'Products',
   '/test-cases': 'Test Cases',
-  '/executions': 'Ejecuciones E2E',
   '/flaky-tests': 'Flaky Tests',
   '/slowest-tests': 'Slowest Tests',
   '/failure-analysis': 'Failure Analysis',

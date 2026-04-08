@@ -11,6 +11,7 @@ import { TableSkeleton } from '@/components/shared/loading-skeleton'
 import { ErrorFallback } from '@/components/shared/error-fallback'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { usePagination } from '@/hooks/use-pagination'
+import { Select } from '@/components/ui/select'
 
 type SortField = 'product' | 'category' | 'executionCount' | 'passRate';
 
@@ -51,6 +52,7 @@ export default function Products() {
     field: 'product',
     direction: 'asc',
   })
+  const categoriesQuery = trpc.report.categories.useQuery({ version: version! })
 
   const query = trpc.report.products.useQuery({
     version: version!,
@@ -72,7 +74,7 @@ export default function Products() {
     { key: 'product', header: 'Product', sortable: true, render: (r) => r.product },
     { key: 'category', header: 'Category', sortable: true, render: (r) => r.category },
     { key: 'tags', header: 'Sub-path', render: (r) => <SubPathBadges tags={r.tags} /> },
-    { key: 'executionCount', header: 'Ejec. E2E', sortable: true, className: 'text-right', render: (r) => formatNumber(r.executionCount) },
+    { key: 'executionCount', header: 'Nro ejecuciones', sortable: true, className: 'text-right', render: (r) => formatNumber(r.executionCount) },
     { key: 'passRate', header: 'Pass Rate', sortable: true, className: 'text-right', render: (r) => <PassRateBadge rate={r.passRate} /> },
   ]
 
@@ -80,14 +82,31 @@ export default function Products() {
   if (query.isError) return <ErrorFallback message={query.error.message} onRetry={() => query.refetch()} />
 
   const result = query.data!
+  const categories = categoriesQuery.data ?? []
 
   return (
     <div className="space-y-4">
       <PageHeader
         title="Products"
-        description={categoryFilter ? `Filtered by category: ${categoryFilter}` : 'Test results grouped by product'}
+        description={categoryFilter ? `Filtered by category: ${categoryFilter}` : 'Resultados agrupados por producto, con número de ejecuciones y pass rate'}
       />
-      <SearchInput value={search} onChange={(v) => { setSearch(v); pagination.resetPage() }} placeholder="Search products..." className="max-w-sm" />
+      <div className="flex flex-wrap gap-3">
+        <SearchInput value={search} onChange={(v) => { setSearch(v); pagination.resetPage() }} placeholder="Search products..." className="max-w-sm" />
+        <Select
+          value={categoryFilter ?? ''}
+          onChange={(e) => {
+            const next = e.target.value
+            pagination.resetPage()
+            navigate(next ? `/products?category=${encodeURIComponent(next)}` : '/products')
+          }}
+          className="w-56"
+        >
+          <option value="">Todas las categorías</option>
+          {categories.map((c) => (
+            <option key={c.category} value={c.category}>{c.category}</option>
+          ))}
+        </Select>
+      </div>
       <DataTable
         columns={columns}
         data={result.items}

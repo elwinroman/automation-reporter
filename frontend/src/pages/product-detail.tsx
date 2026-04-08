@@ -13,25 +13,6 @@ import { ErrorFallback } from '@/components/shared/error-fallback'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 
-interface RunTestCase {
-  name: string;
-  status: 'passed' | 'failed';
-  time: number;
-  failureMessages: string[];
-}
-
-interface RunRow {
-  folderName: string;
-  executionDate: string;
-  tests: number;
-  passed: number;
-  failed: number;
-  time: number;
-  path: string;
-  indexHtml: string;
-  testCases: RunTestCase[];
-}
-
 interface TestCaseRow {
   testCaseName: string;
   executionCount: number;
@@ -73,14 +54,14 @@ export default function ProductDetail() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard title="Producto"        value={d.product}                       color="gray"   />
         <KpiCard title="Categoría"       value={d.category}                      color="blue"   />
-        <KpiCard title="Ejecuciones E2E" value={formatNumber(d.executionCount)}  color="blue"   />
+        <KpiCard title="Nro ejecuciones"  value={formatNumber(d.executionCount)}  color="blue"   />
         <KpiCard title="Tasa de éxito"   value={`${d.passRate.toFixed(1)}%`}     color="green"  />
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            Historial de Ejecuciones E2E
+            Historial de ejecuciones
             <Badge variant="secondary">{d.runs.length} ejecuciones</Badge>
           </CardTitle>
         </CardHeader>

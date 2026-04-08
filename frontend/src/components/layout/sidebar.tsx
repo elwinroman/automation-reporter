@@ -1,10 +1,8 @@
 import { NavLink } from 'react-router'
 import {
   LayoutDashboard,
-  FolderTree,
   Package,
   TestTubes,
-  Play,
   Shuffle,
   Timer,
   AlertTriangle,
@@ -18,10 +16,8 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/categories', label: 'Categorías', icon: FolderTree },
   { to: '/products', label: 'Productos', icon: Package },
   { to: '/test-cases', label: 'Test cases', icon: TestTubes },
-  { to: '/executions', label: 'Ejecuciones E2E', icon: Play },
   { to: '/flaky-tests', label: 'Flaky Tests', icon: Shuffle },
   { to: '/slowest-tests', label: 'Pruebas mas lentas', icon: Timer },
   { to: '/failure-analysis', label: 'Análisis de fallos', icon: AlertTriangle },

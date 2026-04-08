@@ -50,17 +50,6 @@ export const testCasesInputSchema = z.object({
   }).default({ field: 'executionCount', direction: 'desc' }),
 });
 
-export const executionsInputSchema = z.object({
-  version: z.string().min(1),
-  category: z.string().optional(),
-  product: z.string().optional(),
-  dateRange: dateRangeSchema,
-  pagination: paginationSchema.default({ limit: 50, offset: 0 }),
-  sortBy: z.object({
-    field: z.enum(['filePath', 'category', 'product', 'executionDate', 'totalTests', 'totalTime']).default('executionDate'),
-    direction: sortDirectionSchema,
-  }).default({ field: 'executionDate', direction: 'desc' }),
-});
 
 export const productDetailInputSchema = z.object({
   version: z.string().min(1),

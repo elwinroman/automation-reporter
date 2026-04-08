@@ -10,7 +10,6 @@ import type {
   CategorySummary,
   ProductSummary,
   AggregatedTestCase,
-  TestExecution,
 } from '../../domain/entities/index.js'
 
 // ── Shared result types ─────────────────────────────────────────
@@ -36,6 +35,9 @@ export interface FailureGroup {
 export type ProductDetailResult = ProductSummary & {
   relatedTestCases: AggregatedTestCase[];
 };
+
+/** Vista resumida de producto para listados, sin historial de ejecuciones. */
+export type ProductListItem = Omit<ProductSummary, 'runs'>;
 
 // ── Filter param interfaces ─────────────────────────────────────
 
@@ -79,14 +81,6 @@ export interface TestCasesFilters {
   minPassRate?: number;
   maxPassRate?: number;
   search?: string;
-  pagination?: PaginationConfig;
-  sortBy?: SortConfig;
-}
-
-export interface ExecutionsFilters {
-  category?: string;
-  product?: string;
-  dateRange?: DateRange;
   pagination?: PaginationConfig;
   sortBy?: SortConfig;
 }
@@ -222,7 +216,7 @@ export function queryCategories(
 export function queryProducts(
   report: AggregatedReport,
   filters?: ProductsFilters,
-): PaginatedResult<ProductSummary> {
+): PaginatedResult<ProductListItem> {
   let result = [...report.products]
 
   if (filters?.category) {
@@ -253,7 +247,10 @@ export function queryProducts(
   const direction = filters?.sortBy?.direction ?? 'asc'
   result = sortByKey(result, field, direction)
 
-  return paginate(result, filters?.pagination)
+  return paginate(
+    result.map(({ runs: _runs, ...product }) => product),
+    filters?.pagination,
+  )
 }
 
 /** Test cases con filtros por estabilidad, producto, passRate, busqueda y paginacion. */
@@ -297,49 +294,6 @@ export function queryTestCases(
   const field = filters?.sortBy?.field ?? 'executionCount'
   const direction = filters?.sortBy?.direction ?? 'desc'
   result = sortByKey(result, field, direction)
-
-  return paginate(result, filters?.pagination)
-}
-
-/** Ejecuciones con filtros por categoria, producto, rango de fecha y paginacion. */
-export function queryExecutions(
-  report: AggregatedReport,
-  filters?: ExecutionsFilters,
-): PaginatedResult<TestExecution> {
-  let result = [...report.executions]
-
-  if (filters?.category) {
-    const cat = filters.category.toLowerCase()
-    result = result.filter((e) => e.metadata.category.toLowerCase() === cat)
-  }
-
-  if (filters?.product) {
-    const prod = filters.product.toLowerCase()
-    result = result.filter((e) => e.metadata.product.toLowerCase() === prod)
-  }
-
-  if (filters?.dateRange) {
-    result = result.filter((e) =>
-      isInDateRange(new Date(e.metadata.executionDate.toString()), filters.dateRange),
-    )
-  }
-
-  const sortField = filters?.sortBy?.field ?? 'executionDate'
-  const sortDir = filters?.sortBy?.direction ?? 'desc'
-  const multiplier = sortDir === 'asc' ? 1 : -1
-
-  result.sort((a, b) => {
-    switch (sortField) {
-    case 'filePath': return a.filePath.localeCompare(b.filePath) * multiplier
-    case 'category': return a.metadata.category.localeCompare(b.metadata.category) * multiplier
-    case 'product': return a.metadata.product.localeCompare(b.metadata.product) * multiplier
-    case 'executionDate':
-      return (new Date(a.metadata.executionDate.toString()).getTime() - new Date(b.metadata.executionDate.toString()).getTime()) * multiplier
-    case 'totalTests': return (a.totalTests - b.totalTests) * multiplier
-    case 'totalTime': return (a.totalTime - b.totalTime) * multiplier
-    default: return 0
-    }
-  })
 
   return paginate(result, filters?.pagination)
 }

@@ -6,7 +6,6 @@ export {
   queryCategories,
   queryProducts,
   queryTestCases,
-  queryExecutions,
   queryProductDetail,
   queryFlakyTests,
   querySlowestTests,

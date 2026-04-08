@@ -1,7 +1,4 @@
-import {
-  PieChart, Pie, Cell, Label,
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-} from 'recharts'
+import { PieChart, Pie, Cell, Label } from 'recharts'
 import { trpc } from '@/lib/trpc'
 import { useVersion } from '@/context/version-context'
 import { formatTime, formatNumber, formatPassRate } from '@/lib/format'
@@ -49,11 +46,6 @@ export default function Dashboard() {
 
   const summary    = trpc.report.globalSummary.useQuery({ version: version! })
   const categories = trpc.report.categories.useQuery({ version: version! })
-  const executions = trpc.report.executions.useQuery({
-    version: version!,
-    sortBy: { field: 'executionDate', direction: 'desc' },
-    pagination: { limit: 10, offset: 0 },
-  })
 
   if (summary.isLoading || categories.isLoading) return <LoadingSkeleton />
   if (summary.isError)    return <ErrorFallback message={summary.error.message}    onRetry={() => summary.refetch()} />
@@ -68,21 +60,6 @@ export default function Dashboard() {
     { name: 'Exitosos', value: s.totalPassed },
     { name: 'Fallidos', value: s.totalFailed },
   ]
-
-  const execTotal = executions.data?.total ?? 0
-  const execItems = executions.data?.items ?? []
-  const trendData = [...execItems].reverse().map((exec, i) => {
-    const passed = Math.max(0, exec.totalTests - exec.totalFailures - exec.totalErrors)
-    const rate   = exec.totalTests > 0
-      ? Number((passed / exec.totalTests * 100).toFixed(1))
-      : 100
-    const execNum = execTotal - execItems.length + i + 1
-    return { name: `#${execNum}`, passRate: rate }
-  })
-
-  const minRate = trendData.length > 0
-    ? Math.max(0, Math.floor(Math.min(...trendData.map((d) => d.passRate)) / 5) * 5)
-    : 0
 
   return (
     <div className="space-y-5">
@@ -120,60 +97,7 @@ export default function Dashboard() {
       </div>
 
       {/* Charts row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-
-        {/* Left: Trend line chart */}
-        {trendData.length > 0 && (
-          <Card className="shadow-sm">
-            <CardHeader className="px-5 pt-4 pb-1 flex-row items-center justify-between space-y-0">
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">
-                Tendencia — Últimas {trendData.length} Ejecuciones
-              </p>
-              <span className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2.5 py-0.5 rounded-full">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
-                Pass Rate
-              </span>
-            </CardHeader>
-            <CardContent className="px-4 pb-4 pt-2">
-              <ResponsiveContainer width="100%" height={210}>
-                <LineChart data={trendData} margin={{ top: 8, right: 8, left: -12, bottom: 4 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                  <XAxis
-                    dataKey="name"
-                    tick={{ fontSize: 11, fill: '#94a3b8' }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    domain={[minRate, 100]}
-                    tickFormatter={(v) => `${v}%`}
-                    tick={{ fontSize: 11, fill: '#94a3b8' }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      background: '#fff',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: 8,
-                      fontSize: 12,
-                      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.07)',
-                    }}
-                    formatter={(v: number) => [`${v}%`, 'Pass Rate']}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="passRate"
-                    stroke="#10b981"
-                    strokeWidth={2}
-                    dot={{ fill: '#10b981', strokeWidth: 0, r: 4 }}
-                    activeDot={{ r: 6, fill: '#10b981', stroke: '#fff', strokeWidth: 2 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        )}
+      <div className="grid grid-cols-1 gap-5">
 
         {/* Right: Distribution by category */}
         {cats.length > 0 && (
@@ -189,35 +113,36 @@ export default function Dashboard() {
                 {/* Donut + legend */}
                 <div className="shrink-0 flex flex-col items-center">
                   <PieChart width={148} height={148}>
-                      <Pie
-                        data={pieData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={48}
-                        outerRadius={66}
-                        paddingAngle={2}
-                        dataKey="value"
-                        strokeWidth={0}
-                      >
-                        <Cell fill={PIE_PASSED} />
-                        <Cell fill={PIE_FAILED} />
-                        <Label
-                          content={({ viewBox }: { viewBox?: { cx?: number; cy?: number } }) => {
-                            const cx = viewBox?.cx ?? 0
-                            const cy = viewBox?.cy ?? 0
-                            return (
-                              <g>
-                                <text x={cx} y={cy - 4} textAnchor="middle" fontSize={17} fontWeight={700} fill={rateColor(s.globalPassRate)}>
-                                  {s.globalPassRate.toFixed(1)}%
-                                </text>
-                                <text x={cx} y={cy + 11} textAnchor="middle" fontSize={8} fill="#94a3b8" letterSpacing="0.08em">
+                    <Pie
+                      data={pieData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={48}
+                      outerRadius={66}
+                      paddingAngle={2}
+                      dataKey="value"
+                      strokeWidth={0}
+                    >
+                      <Cell fill={PIE_PASSED} />
+                      <Cell fill={PIE_FAILED} />
+                      <Label
+                        content={({ viewBox }) => {
+                          const pieViewBox = viewBox as { cx?: number; cy?: number } | undefined
+                          const cx = pieViewBox?.cx ?? 0
+                          const cy = pieViewBox?.cy ?? 0
+                          return (
+                            <g>
+                              <text x={cx} y={cy - 4} textAnchor="middle" fontSize={17} fontWeight={700} fill={rateColor(s.globalPassRate)}>
+                                {s.globalPassRate.toFixed(1)}%
+                              </text>
+                              <text x={cx} y={cy + 11} textAnchor="middle" fontSize={8} fill="#94a3b8" letterSpacing="0.08em">
                                   PASS RATE
-                                </text>
-                              </g>
-                            )
-                          }}
-                        />
-                      </Pie>
+                              </text>
+                            </g>
+                          )
+                        }}
+                      />
+                    </Pie>
                   </PieChart>
 
                   <div className="flex flex-col gap-1 mt-1">
@@ -255,3 +180,4 @@ export default function Dashboard() {
     </div>
   )
 }
+
