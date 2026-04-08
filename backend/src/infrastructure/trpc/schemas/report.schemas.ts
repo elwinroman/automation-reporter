@@ -74,6 +74,15 @@ export const slowestTestsInputSchema = z.object({
   }).default({ field: 'avgTime', direction: 'desc' }),
 });
 
+export const slowestProductsInputSchema = z.object({
+  version: z.string().min(1),
+  topN: z.number().int().min(1).max(100).default(10),
+  sortBy: z.object({
+    field: z.enum(['executionCount', 'avgTime', 'totalTime']).default('avgTime'),
+    direction: sortDirectionSchema,
+  }).default({ field: 'avgTime', direction: 'desc' }),
+});
+
 export const failureAnalysisInputSchema = z.object({
   version: z.string().min(1),
   search: z.string().optional(),

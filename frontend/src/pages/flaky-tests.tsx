@@ -127,7 +127,9 @@ export default function FlakyTests() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Flaky Tests" description="Casos con comportamiento inestable entre ejecuciones, ordenados para identificar ruido y regresiones intermitentes." />
+      <PageHeader
+        description="Casos con comportamiento inestable entre ejecuciones. Esta vista prioriza la deteccion de ruido, regresiones intermitentes y pruebas sensibles, mostrando frecuencia de falla, tasa de exito y los productos donde aparece cada caso."
+      />
       <div className="rounded-md border border-border/25 bg-card px-4 py-4">
         <p className="text-sm text-muted-foreground">
           Revisa primero los casos con menor tasa de exito y mas fallos acumulados. Los badges de producto te llevan al detalle relacionado.

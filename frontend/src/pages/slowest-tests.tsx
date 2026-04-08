@@ -4,7 +4,7 @@ import { ArrowUpRight } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { trpc } from '@/lib/trpc'
 import { useVersion } from '@/context/version-context'
-import { formatTime } from '@/lib/format'
+import { formatTime, formatNumber } from '@/lib/format'
 import { PageHeader } from '@/components/shared/page-header'
 import { DataTable, type Column } from '@/components/shared/data-table'
 import { LoadingSkeleton } from '@/components/shared/loading-skeleton'
@@ -13,9 +13,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Tooltip as UiTooltip } from '@/components/ui/tooltip'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 type SortField = 'testCaseName' | 'executionCount' | 'avgTime' | 'maxTime' | 'totalTime' | 'minTime'
 type ChartMetric = 'executionCount' | 'avgTime' | 'maxTime' | 'totalTime' | 'minTime'
+type ProductSortField = 'product' | 'executionCount' | 'avgTime' | 'totalTime'
+type ProductChartMetric = 'executionCount' | 'avgTime' | 'totalTime'
 
 const chartLabels: Record<ChartMetric, string> = {
   executionCount: 'Runs',
@@ -23,6 +26,12 @@ const chartLabels: Record<ChartMetric, string> = {
   maxTime: 'Max Time',
   totalTime: 'Total Time',
   minTime: 'Min Time',
+}
+
+const productChartLabels: Record<ProductChartMetric, string> = {
+  executionCount: 'Runs',
+  avgTime: 'Avg Time',
+  totalTime: 'Total Time',
 }
 
 const chartAxisColor = 'hsl(var(--muted-foreground))'
@@ -59,11 +68,25 @@ interface TestRow {
   products: string[]
 }
 
+interface ProductRow {
+  product: string
+  category: string
+  executionCount: number
+  totalTime: number
+  avgTime: number
+  tags: string[]
+}
+
 export default function SlowestTests() {
   const navigate = useNavigate()
   const { version } = useVersion()
+  const [view, setView] = useState<'test-cases' | 'products'>('test-cases')
   const [topN, setTopN] = useState(10)
   const [sort, setSort] = useState<{ field: SortField; direction: 'asc' | 'desc' }>({
+    field: 'avgTime',
+    direction: 'desc',
+  })
+  const [productSort, setProductSort] = useState<{ field: ProductSortField; direction: 'asc' | 'desc' }>({
     field: 'avgTime',
     direction: 'desc',
   })
@@ -77,8 +100,17 @@ export default function SlowestTests() {
     topN,
     sortBy: backendSort,
   })
+  const backendProductSort = productSort.field === 'product'
+    ? { field: 'avgTime' as const, direction: 'desc' as const }
+    : { field: productSort.field, direction: productSort.direction }
+  const productsQuery = trpc.report.slowestProducts.useQuery({
+    version: version!,
+    topN,
+    sortBy: backendProductSort,
+  })
 
   const data = query.data ?? []
+  const productData = productsQuery.data ?? []
   const sortedData = useMemo(() => {
     const multiplier = sort.direction === 'asc' ? 1 : -1
     return [...data].sort((a, b) => {
@@ -88,9 +120,19 @@ export default function SlowestTests() {
       return (a[sort.field] - b[sort.field]) * multiplier
     })
   }, [data, sort])
+  const sortedProducts = useMemo(() => {
+    const multiplier = productSort.direction === 'asc' ? 1 : -1
+    return [...productData].sort((a, b) => {
+      if (productSort.field === 'product') {
+        return a.product.localeCompare(b.product) * multiplier
+      }
+      return (a[productSort.field] - b[productSort.field]) * multiplier
+    })
+  }, [productData, productSort])
 
-  if (query.isLoading) return <LoadingSkeleton />
+  if (query.isLoading || productsQuery.isLoading) return <LoadingSkeleton />
   if (query.isError) return <ErrorFallback message={query.error.message} onRetry={() => query.refetch()} />
+  if (productsQuery.isError) return <ErrorFallback message={productsQuery.error.message} onRetry={() => productsQuery.refetch()} />
 
   const chartMetric: ChartMetric = sort.field === 'testCaseName' ? 'totalTime' : sort.field
   const chartData = sortedData.map((d) => ({
@@ -98,13 +140,25 @@ export default function SlowestTests() {
     fullName: d.testCaseName,
     value: d[chartMetric],
   }))
+  const productChartMetric: ProductChartMetric = productSort.field === 'product' ? 'avgTime' : productSort.field
+  const productChartData = sortedProducts.map((d) => ({
+    name: d.product.length > 28 ? d.product.slice(0, 28) + '...' : d.product,
+    fullName: d.product,
+    value: d[productChartMetric],
+  }))
 
   function formatChartValue(value: number) {
     return chartMetric === 'executionCount' ? value.toString() : formatTime(value)
   }
+  function formatProductChartValue(value: number) {
+    return productChartMetric === 'executionCount' ? formatNumber(value) : formatTime(value)
+  }
 
   function metricColumnClass(target: 'avgTime' | 'maxTime' | 'totalTime') {
     return target === chartMetric ? 'text-right font-semibold text-foreground' : 'text-right'
+  }
+  function productMetricColumnClass(target: 'avgTime' | 'totalTime') {
+    return target === productChartMetric ? 'text-right font-semibold text-foreground' : 'text-right'
   }
 
   function ProductBadges({ products }: { products: string[] }) {
@@ -136,6 +190,12 @@ export default function SlowestTests() {
       direction: prev.field === field && prev.direction === 'asc' ? 'desc' : 'asc',
     }))
   }
+  function handleProductSort(field: string) {
+    setProductSort((prev) => ({
+      field: field as ProductSortField,
+      direction: prev.field === field && prev.direction === 'asc' ? 'desc' : 'asc',
+    }))
+  }
 
   const columns: Column<TestRow>[] = [
     {
@@ -157,11 +217,35 @@ export default function SlowestTests() {
     { key: 'totalTime', header: 'Total Time', sortable: true, className: metricColumnClass('totalTime'), render: (r) => formatTime(r.totalTime) },
     { key: 'minTime', header: 'Min Time', sortable: true, className: 'text-right', render: (r) => formatTime(r.minTime) },
   ]
+  const productColumns: Column<ProductRow>[] = [
+    {
+      key: 'product',
+      header: 'Product',
+      sortable: true,
+      render: (r) => (
+        <UiTooltip content={<div className="max-w-md break-words text-xs">{r.product}</div>}>
+          <span className="truncate max-w-[300px] block">{r.product}</span>
+        </UiTooltip>
+      ),
+    },
+    { key: 'category', header: 'Category', render: (r) => r.category },
+    { key: 'executionCount', header: 'Runs', sortable: true, className: 'text-right', render: (r) => formatNumber(r.executionCount) },
+    { key: 'avgTime', header: 'Avg Time', sortable: true, className: productMetricColumnClass('avgTime'), render: (r) => formatTime(r.avgTime) },
+    { key: 'totalTime', header: 'Total Time', sortable: true, className: productMetricColumnClass('totalTime'), render: (r) => formatTime(r.totalTime) },
+  ]
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Pruebas mas lentas" description="Ranking de pruebas más lentas, con acceso directo a los productos relacionados" />
-      <div className="flex gap-3">
+      <PageHeader
+        description="Analisis de tiempos de ejecucion por caso de prueba y por producto. Usa los tabs para cambiar de perspectiva y detectar si la lentitud esta concentrada en pruebas puntuales o en componentes completos del flujo."
+      />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Tabs value={view} onValueChange={(value) => setView(value as 'test-cases' | 'products')}>
+          <TabsList>
+            <TabsTrigger value="test-cases">Test Cases</TabsTrigger>
+            <TabsTrigger value="products">Products</TabsTrigger>
+          </TabsList>
+        </Tabs>
         <Select value={String(topN)} onChange={(e) => setTopN(Number(e.target.value))} className="w-32">
           {[5, 10, 20, 50].map((n) => (
             <option key={n} value={n}>Top {n}</option>
@@ -169,52 +253,106 @@ export default function SlowestTests() {
         </Select>
       </div>
 
-      <Card>
-        <CardHeader className="px-4 pb-3 sm:px-6">
-          <CardTitle className="text-base">{chartLabels[chartMetric]}</CardTitle>
-        </CardHeader>
-        <CardContent className="px-4 pb-5 sm:px-6">
-          <ResponsiveContainer width="100%" height={Math.max(300, chartData.length * 35)}>
-            <BarChart data={chartData} layout="vertical" margin={{ top: 8, right: 8, bottom: 8, left: 12 }}>
-              <CartesianGrid stroke={chartGridColor} strokeDasharray="3 3" />
-              <XAxis
-                type="number"
-                tickFormatter={(value: number) => formatChartValue(value)}
-                tick={{ fontSize: 10, fill: chartAxisColor }}
-                axisLine={{ stroke: chartGridColor }}
-                tickLine={{ stroke: chartGridColor }}
-              />
-              <YAxis
-                type="category"
-                dataKey="name"
-                width={176}
-                tick={{ fontSize: 10, fill: chartAxisColor }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <Tooltip
-                formatter={(value: number) => [formatChartValue(value), 'Time']}
-                labelFormatter={(_label, payload) => {
-                  const item = payload?.[0]?.payload as { fullName?: string } | undefined
-                  return item?.fullName ?? ''
-                }}
-                contentStyle={chartTooltipStyle}
-                labelStyle={chartTooltipLabelStyle}
-                itemStyle={chartTooltipItemStyle}
-                cursor={{ fill: 'hsl(var(--primary) / 0.08)' }}
-              />
-              <Bar dataKey="value" fill={chartBarColor} radius={[0, 4, 4, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
+      <Tabs value={view} onValueChange={(value) => setView(value as 'test-cases' | 'products')} className="space-y-4">
+        <TabsContent value="test-cases" className="space-y-4">
+          <Card>
+            <CardHeader className="px-4 pb-3 sm:px-6">
+              <CardTitle className="text-base">{chartLabels[chartMetric]}</CardTitle>
+            </CardHeader>
+            <CardContent className="px-4 pb-5 sm:px-6">
+              <ResponsiveContainer width="100%" height={Math.max(300, chartData.length * 35)}>
+                <BarChart data={chartData} layout="vertical" margin={{ top: 8, right: 8, bottom: 8, left: 12 }}>
+                  <CartesianGrid stroke={chartGridColor} strokeDasharray="3 3" />
+                  <XAxis
+                    type="number"
+                    tickFormatter={(value: number) => formatChartValue(value)}
+                    tick={{ fontSize: 10, fill: chartAxisColor }}
+                    axisLine={{ stroke: chartGridColor }}
+                    tickLine={{ stroke: chartGridColor }}
+                  />
+                  <YAxis
+                    type="category"
+                    dataKey="name"
+                    width={176}
+                    tick={{ fontSize: 10, fill: chartAxisColor }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    formatter={(value: number) => [formatChartValue(value), 'Time']}
+                    labelFormatter={(_label, payload) => {
+                      const item = payload?.[0]?.payload as { fullName?: string } | undefined
+                      return item?.fullName ?? ''
+                    }}
+                    contentStyle={chartTooltipStyle}
+                    labelStyle={chartTooltipLabelStyle}
+                    itemStyle={chartTooltipItemStyle}
+                    cursor={{ fill: 'hsl(var(--primary) / 0.08)' }}
+                  />
+                  <Bar dataKey="value" fill={chartBarColor} radius={[0, 4, 4, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
 
-      <DataTable
-        columns={columns}
-        data={sortedData}
-        sort={sort}
-        onSort={handleSort}
-      />
+          <DataTable
+            columns={columns}
+            data={sortedData}
+            sort={sort}
+            onSort={handleSort}
+          />
+        </TabsContent>
+
+        <TabsContent value="products" className="space-y-4">
+          <Card>
+            <CardHeader className="px-4 pb-3 sm:px-6">
+              <CardTitle className="text-base">{productChartLabels[productChartMetric]}</CardTitle>
+            </CardHeader>
+            <CardContent className="px-4 pb-5 sm:px-6">
+              <ResponsiveContainer width="100%" height={Math.max(260, productChartData.length * 35)}>
+                <BarChart data={productChartData} layout="vertical" margin={{ top: 8, right: 8, bottom: 8, left: 12 }}>
+                  <CartesianGrid stroke={chartGridColor} strokeDasharray="3 3" />
+                  <XAxis
+                    type="number"
+                    tickFormatter={(value: number) => formatProductChartValue(value)}
+                    tick={{ fontSize: 10, fill: chartAxisColor }}
+                    axisLine={{ stroke: chartGridColor }}
+                    tickLine={{ stroke: chartGridColor }}
+                  />
+                  <YAxis
+                    type="category"
+                    dataKey="name"
+                    width={176}
+                    tick={{ fontSize: 10, fill: chartAxisColor }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    formatter={(value: number) => [formatProductChartValue(value), productChartLabels[productChartMetric]]}
+                    labelFormatter={(_label, payload) => {
+                      const item = payload?.[0]?.payload as { fullName?: string } | undefined
+                      return item?.fullName ?? ''
+                    }}
+                    contentStyle={chartTooltipStyle}
+                    labelStyle={chartTooltipLabelStyle}
+                    itemStyle={chartTooltipItemStyle}
+                    cursor={{ fill: 'hsl(var(--primary) / 0.08)' }}
+                  />
+                  <Bar dataKey="value" fill={chartBarColor} radius={[0, 4, 4, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          <DataTable
+            columns={productColumns}
+            data={sortedProducts}
+            sort={productSort}
+            onSort={handleProductSort}
+            onRowClick={(row) => navigate(`/products/${encodeURIComponent(row.product)}`)}
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

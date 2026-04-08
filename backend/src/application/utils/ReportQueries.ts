@@ -98,6 +98,23 @@ export interface SlowestTestsFilters {
   };
 }
 
+export interface SlowestProductsFilters {
+  topN?: number;
+  sortBy?: {
+    field: 'executionCount' | 'avgTime' | 'totalTime';
+    direction: 'asc' | 'desc';
+  };
+}
+
+export interface SlowestProductItem {
+  product: string;
+  category: string;
+  executionCount: number;
+  totalTime: number;
+  avgTime: number;
+  tags: string[];
+}
+
 export interface FailureAnalysisFilters {
   search?: string;
   pagination?: PaginationConfig;
@@ -358,6 +375,33 @@ export function querySlowestTests(
   const multiplier = direction === 'asc' ? 1 : -1
 
   return [...report.testCases]
+    .sort((a, b) => (a[field] - b[field]) * multiplier)
+    .slice(0, topN)
+}
+
+/** Top N productos mas lentos ordenados por la metrica seleccionada. */
+export function querySlowestProducts(
+  report: AggregatedReport,
+  filters?: SlowestProductsFilters,
+): SlowestProductItem[] {
+  const topN = filters?.topN ?? 10
+  const field = filters?.sortBy?.field ?? 'avgTime'
+  const direction = filters?.sortBy?.direction ?? 'desc'
+  const multiplier = direction === 'asc' ? 1 : -1
+
+  return report.products
+    .map((product) => {
+      const totalTime = product.runs.reduce((sum, run) => sum + run.time, 0)
+      const executionCount = product.executionCount
+      return {
+        product: product.product,
+        category: product.category,
+        executionCount,
+        totalTime,
+        avgTime: executionCount > 0 ? totalTime / executionCount : 0,
+        tags: product.tags,
+      }
+    })
     .sort((a, b) => (a[field] - b[field]) * multiplier)
     .slice(0, topN)
 }

@@ -1,6 +1,7 @@
 ﻿import { useState, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 import { keepPreviousData } from '@tanstack/react-query'
+import { ChevronRight } from 'lucide-react'
 import { trpc } from '@/lib/trpc'
 import { useVersion } from '@/context/version-context'
 import { formatNumber } from '@/lib/format'
@@ -26,18 +27,19 @@ interface ProductRow {
   tags: string[]
 }
 
+const compactHeaderClassName = 'text-[10px] tracking-[0.14em]'
+const compactHeaderButtonClassName = 'text-[10px] tracking-[0.12em]'
+
 function SubPathBadges({ tags }: { tags: string[] }) {
   const unique = [...new Set(tags)]
   if (unique.length === 0) return null
   return (
-    <div className="flex flex-wrap gap-1">
-      {unique.map((tag) => (
-        <span
-          key={tag}
-          className="inline-flex items-center rounded-md border border-border/30 bg-secondary px-2 py-0.5 text-[11px] font-medium text-muted-foreground"
-        >
-          {tag}
-        </span>
+    <div className="flex flex-wrap items-center gap-1 text-[11px] text-muted-foreground">
+      {unique.map((tag, index) => (
+        <div key={tag} className="inline-flex items-center gap-1">
+          {index > 0 && <ChevronRight className="h-3 w-3 opacity-45" />}
+          <span className={index === unique.length - 1 ? 'font-medium text-foreground' : ''}>{tag}</span>
+        </div>
       ))}
     </div>
   )
@@ -79,11 +81,46 @@ export default function Products() {
   }, [pagination])
 
   const columns: Column<ProductRow>[] = [
-    { key: 'product', header: 'Producto', sortable: true, render: (r) => r.product },
-    { key: 'category', header: 'Categoría', sortable: true, render: (r) => r.category },
-    { key: 'tags', header: 'Subruta', render: (r) => <SubPathBadges tags={r.tags} /> },
-    { key: 'executionCount', header: 'Nro ejecuciones', sortable: true, className: 'text-right', render: (r) => formatNumber(r.executionCount) },
-    { key: 'passRate', header: 'Tasa de éxito', sortable: true, className: 'text-right', render: (r) => <PassRateBadge rate={r.passRate} /> },
+    {
+      key: 'product',
+      header: 'Product',
+      sortable: true,
+      headerClassName: compactHeaderClassName,
+      headerButtonClassName: compactHeaderButtonClassName,
+      render: (r) => r.product,
+    },
+    {
+      key: 'category',
+      header: 'Category',
+      sortable: true,
+      headerClassName: compactHeaderClassName,
+      headerButtonClassName: compactHeaderButtonClassName,
+      render: (r) => r.category,
+    },
+    {
+      key: 'tags',
+      header: 'Subpath',
+      headerClassName: compactHeaderClassName,
+      render: (r) => <SubPathBadges tags={r.tags} />,
+    },
+    {
+      key: 'executionCount',
+      header: 'Runs',
+      sortable: true,
+      className: 'text-right',
+      headerClassName: compactHeaderClassName,
+      headerButtonClassName: compactHeaderButtonClassName,
+      render: (r) => formatNumber(r.executionCount),
+    },
+    {
+      key: 'passRate',
+      header: 'Pass Rate',
+      sortable: true,
+      className: 'text-right',
+      headerClassName: compactHeaderClassName,
+      headerButtonClassName: compactHeaderButtonClassName,
+      render: (r) => <PassRateBadge rate={r.passRate} />,
+    },
   ]
 
   if (query.isLoading && !query.data) return <TableSkeleton />
@@ -95,11 +132,10 @@ export default function Products() {
   return (
     <div className="space-y-5">
       <PageHeader
-        title="Productos"
         description={
           categoryFilter
-            ? `Listado filtrado por la categoría ${categoryFilter}.`
-            : 'Resultados agrupados por producto, con volumen de ejecuciones y tasa de éxito.'
+            ? `Vista enfocada en la categoria ${categoryFilter}. Aqui puedes comparar productos por volumen de ejecuciones, tasa de exito y subruta operativa para detectar donde se concentra la actividad y que grupo necesita revision.`
+            : 'Listado consolidado por producto. Sirve para comparar carga de ejecuciones, estabilidad general y contexto de subruta en una sola tabla antes de entrar al detalle de cada producto.'
         }
       />
       <div className="rounded-md border border-border/25 bg-card px-4 py-4">

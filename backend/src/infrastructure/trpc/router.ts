@@ -9,6 +9,7 @@ import {
   productDetail,
   flakyTests,
   slowestTests,
+  slowestProducts,
   failureAnalysis,
 } from './procedures/index.js'
 
@@ -24,6 +25,7 @@ export const appRouter = router({
     productDetail,
     flakyTests,
     slowestTests,
+    slowestProducts,
     failureAnalysis,
   }),
 })

@@ -173,8 +173,7 @@ export default function TestCases() {
   return (
     <div className="space-y-5">
       <PageHeader
-        title="Test Cases"
-        description="Resultados agregados por caso de prueba, con acceso directo a los productos relacionados."
+        description="Resultados agregados por caso de prueba a traves de multiples ejecuciones. Esta vista te ayuda a identificar frecuencia de uso, estabilidad, tiempo promedio y relacion con productos concretos sin perder el contexto comparativo."
       />
       <div className="rounded-md border border-border/25 bg-card px-4 py-4">
         <div className="flex flex-col gap-4">

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { keepPreviousData } from '@tanstack/react-query'
 import { ArrowUpRight } from 'lucide-react'
@@ -31,7 +31,6 @@ export default function FailureAnalysis() {
   const query = trpc.report.failureAnalysis.useQuery(
     {
       version: version!,
-      minOccurrences: 1,
       search: debouncedSearch || undefined,
       pagination: { limit: pagination.pageSize, offset: pagination.offset },
     },
@@ -47,7 +46,7 @@ export default function FailureAnalysis() {
       render: (r) => (
         <div
           title={r.message}
-          className="max-w-[460px] rounded-md border border-border/25 bg-secondary px-3 py-2 text-xs leading-5 text-foreground"
+          className="max-w-[460px] text-sm leading-6 text-foreground"
           style={{
             display: '-webkit-box',
             WebkitLineClamp: 3,
@@ -106,8 +105,7 @@ export default function FailureAnalysis() {
   return (
     <div className="space-y-5">
       <PageHeader
-        title="Análisis de fallos"
-        description="Fallos agrupados por mensaje para detectar patrones repetidos y acceder rapido a los productos afectados."
+        description="Vista agrupada por mensaje de error para detectar patrones repetidos, medir su impacto y ubicar rapidamente que productos y cuantos casos estan siendo afectados por cada tipo de fallo."
       />
       <div className="rounded-md border border-border/25 bg-card px-4 py-4">
         <div className="flex flex-wrap items-end gap-3">
@@ -136,3 +134,4 @@ export default function FailureAnalysis() {
     </div>
   )
 }
+

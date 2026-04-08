@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 
 interface PageHeaderProps {
-  title: string;
+  title?: string;
   description?: string;
   actions?: ReactNode;
 }
@@ -13,9 +13,9 @@ export function PageHeader({ title, description, actions }: PageHeaderProps) {
         <p className="text-sm font-bold uppercase tracking-[0.2em] text-foreground">
           Resumen
         </p>
-        <h1 className="mt-2 text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">{title}</h1>
+        {title && <h1 className="mt-2 text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">{title}</h1>}
         {description && (
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
+          <p className={`${title ? 'mt-2' : 'mt-1'} max-w-3xl text-sm leading-6 text-muted-foreground`}>
             {description}
           </p>
         )}
