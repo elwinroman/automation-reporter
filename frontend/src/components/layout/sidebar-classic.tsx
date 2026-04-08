@@ -30,7 +30,7 @@ export function SidebarClassic() {
     <aside className="fixed left-0 top-0 z-40 flex h-screen w-64 shrink-0 flex-col gap-2 border-r border-border/50 bg-popover p-4">
       <div className="mb-8 px-4 py-2">
         <h1 className="text-lg font-extrabold tracking-tight text-foreground">Automation Reporter</h1>
-        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Enterprise Reporting</p>
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">CRACLASA Reporting</p>
       </div>
       <ScrollArea className="flex-1">
         <nav className="flex flex-col gap-1">

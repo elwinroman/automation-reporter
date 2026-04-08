@@ -67,14 +67,14 @@ export default function VersionSelector() {
           <Database className="mx-auto h-12 w-12 text-muted-foreground mb-3" />
           <h1 className="text-3xl font-bold tracking-tight">Automation Reporter</h1>
           <p className="text-muted-foreground mt-1">
-            Select a version to view the test report
+            Selecciona una versión para ver el reporte de pruebas
           </p>
         </div>
 
         {data.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-muted-foreground">
-              No versions found. Make sure the LOGS_DIRECTORY is configured.
+              Versiones no encontradas. Asegurate que LOGS_DIRECTORY esté configurado.
             </p>
           </div>
         ) : (
@@ -97,8 +97,8 @@ export default function VersionSelector() {
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-xs text-muted-foreground truncate">
                         {v.cached
-                          ? `Generated ${v.generatedAt ? new Date(v.generatedAt).toLocaleString() : ''}`
-                          : 'Not generated'}
+                          ? `Generado ${v.generatedAt ? new Date(v.generatedAt).toLocaleString() : ''}`
+                          : 'No generado'}
                       </span>
                       <div className="flex items-center gap-1 shrink-0">
                         {v.cached && (
@@ -131,11 +131,11 @@ export default function VersionSelector() {
                           {!v.cached && isPending ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
                           ) : v.cached ? (
-                            'View'
+                            'Ver'
                           ) : (
                             <>
                               <Play className="h-3 w-3" />
-                              Generate
+                              Generar
                             </>
                           )}
                         </Button>

@@ -7,11 +7,11 @@ import { useVersion } from '@/context/version-context'
 
 const routeNames: Record<string, string> = {
   '/dashboard': 'Dashboard',
-  '/products': 'Products',
+  '/products': 'Productos',
   '/test-cases': 'Test Cases',
   '/flaky-tests': 'Flaky Tests',
-  '/slowest-tests': 'Slowest Tests',
-  '/failure-analysis': 'Failure Analysis',
+  '/slowest-tests': 'Pruebas más lentas',
+  '/failure-analysis': 'Análisis de fallos',
 }
 
 export function Header() {
