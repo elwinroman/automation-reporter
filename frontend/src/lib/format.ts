@@ -15,11 +15,33 @@ export function formatPassRate(rate: number): string {
   return `${rate.toFixed(1)}%`
 }
 
+export type RateTone = 'good' | 'warning' | 'critical'
+
+export function passRateTone(rate: number): RateTone {
+  if (rate >= 90) return 'good'
+  if (rate >= 70) return 'warning'
+  return 'critical'
+}
+
 /** Get color class for a pass rate value */
 export function passRateColor(rate: number): 'green' | 'yellow' | 'red' {
-  if (rate >= 90) return 'green'
-  if (rate >= 70) return 'yellow'
+  const tone = passRateTone(rate)
+  if (tone === 'good') return 'green'
+  if (tone === 'warning') return 'yellow'
   return 'red'
+}
+
+export function overallHealthStatus(passRate: number, failedCount: number): {
+  label: 'Saludable' | 'Atencion' | 'Critico'
+  tone: RateTone
+} {
+  if (passRate >= 90 && failedCount <= 5) {
+    return { label: 'Saludable', tone: 'good' }
+  }
+  if (passRate >= 75 && failedCount <= 12) {
+    return { label: 'Atencion', tone: 'warning' }
+  }
+  return { label: 'Critico', tone: 'critical' }
 }
 
 /** Format large numbers with locale separators */

@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router'
+import { ArrowUpRight } from 'lucide-react'
 import { trpc } from '@/lib/trpc'
 import { useVersion } from '@/context/version-context'
 import { formatNumber } from '@/lib/format'
@@ -46,13 +47,13 @@ export default function FlakyTests() {
   }, [pagination])
 
   const columns: Column<FlakyRow>[] = [
-    { key: 'testCaseName', header: 'Test Case', sortable: true, render: (r) => <span className="truncate max-w-[300px] block">{r.testCaseName}</span> },
-    { key: 'executionCount', header: 'Runs', sortable: true, className: 'text-right', render: (r) => formatNumber(r.executionCount) },
-    { key: 'passCount', header: 'Passed', className: 'text-right', render: (r) => r.passCount },
-    { key: 'failCount', header: 'Failed', sortable: true, className: 'text-right', render: (r) => <span className="text-red-600 font-medium">{r.failCount}</span> },
-    { key: 'passRate', header: 'Pass Rate', sortable: true, className: 'text-right', render: (r) => <PassRateBadge rate={r.passRate} /> },
+    { key: 'testCaseName', header: 'Caso de prueba', sortable: true, render: (r) => <span className="block max-w-[300px] truncate">{r.testCaseName}</span> },
+    { key: 'executionCount', header: 'Ejecuciones', sortable: true, className: 'text-right', render: (r) => formatNumber(r.executionCount) },
+    { key: 'passCount', header: 'Exitosos', className: 'text-right', render: (r) => r.passCount },
+    { key: 'failCount', header: 'Fallidos', sortable: true, className: 'text-right', render: (r) => <span className="font-medium text-destructive">{r.failCount}</span> },
+    { key: 'passRate', header: 'Tasa de éxito', sortable: true, className: 'text-right', render: (r) => <PassRateBadge rate={r.passRate} /> },
     {
-      key: 'products', header: 'Products', render: (r) => (
+      key: 'products', header: 'Productos', render: (r) => (
         <div className="flex flex-wrap gap-1">
           {[...new Set(r.products)].map((p) => (
             <button
@@ -60,7 +61,10 @@ export default function FlakyTests() {
               type="button"
               onClick={() => navigate(`/products/${encodeURIComponent(p)}`)}
             >
-              <Badge variant="secondary" className="text-xs hover:bg-slate-200 cursor-pointer">{p}</Badge>
+              <Badge variant="secondary" className="cursor-pointer rounded-md border border-border/30 bg-secondary text-[11px] font-medium text-muted-foreground hover:bg-secondary/80 hover:text-foreground">
+                {p}
+                <ArrowUpRight className="ml-1 h-3 w-3 opacity-70" />
+              </Badge>
             </button>
           ))}
         </div>
@@ -74,8 +78,13 @@ export default function FlakyTests() {
   const result = query.data!
 
   return (
-    <div className="space-y-4">
-      <PageHeader title="Flaky Tests" description="Tests con resultados inestables entre ejecuciones" />
+    <div className="space-y-5">
+      <PageHeader title="Flaky Tests" description="Casos con comportamiento inestable entre ejecuciones, ordenados para identificar ruido y regresiones intermitentes." />
+      <div className="rounded-md border border-border/25 bg-card px-4 py-4">
+        <p className="text-sm text-muted-foreground">
+          Revisa primero los casos con menor tasa de éxito y más fallos acumulados. Los badges de producto te llevan al detalle relacionado.
+        </p>
+      </div>
       <DataTable
         columns={columns}
         data={result.items}

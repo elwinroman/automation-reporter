@@ -48,7 +48,7 @@ export default function ProductDetail() {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-border">
             {d.runs.map((run, i) => {
               const isOpen = expandedRun === i
               const passRate = run.tests > 0 ? (run.passed / run.tests) * 100 : 0
@@ -60,34 +60,34 @@ export default function ProductDetail() {
                       className="flex flex-1 items-center gap-4 text-left"
                       onClick={() => setExpandedRun(isOpen ? null : i)}
                     >
-                      <span className="w-4 text-xs text-slate-400">{isOpen ? '▾' : '▸'}</span>
-                      <span className="flex-1 text-xs text-slate-500">
+                      <span className="w-4 text-xs text-muted-foreground">{isOpen ? '▾' : '▸'}</span>
+                      <span className="flex-1 text-xs text-muted-foreground">
                         {run.path.split('\\').map((seg, si, arr) => (
                           <span key={si}>
-                            {si > 0 && <span className="mx-1 text-slate-300">›</span>}
-                            <span className={si === arr.length - 1 ? 'font-medium text-slate-700' : ''}>{seg}</span>
+                            {si > 0 && <span className="mx-1 text-border">›</span>}
+                            <span className={si === arr.length - 1 ? 'font-medium text-foreground' : ''}>{seg}</span>
                           </span>
                         ))}
                       </span>
-                      <span className="w-36 shrink-0 text-xs text-slate-500">
+                      <span className="w-36 shrink-0 text-xs text-muted-foreground">
                         {new Date(run.executionDate).toLocaleString('es')}
                       </span>
-                      <span className="w-16 shrink-0 text-right text-xs text-slate-500">{run.tests} tests</span>
-                      <span className="w-16 shrink-0 text-right text-xs text-emerald-600">{run.passed} ok</span>
-                      <span className={`w-16 shrink-0 text-right text-xs ${run.failed > 0 ? 'font-medium text-red-600' : 'text-slate-400'}`}>
+                      <span className="w-16 shrink-0 text-right text-xs text-muted-foreground">{run.tests} tests</span>
+                      <span className="w-16 shrink-0 text-right text-xs text-[hsl(var(--success))]">{run.passed} ok</span>
+                      <span className={`w-16 shrink-0 text-right text-xs ${run.failed > 0 ? 'font-medium text-destructive' : 'text-muted-foreground'}`}>
                         {run.failed} fail
                       </span>
                       <span className="w-20 shrink-0 text-right">
                         <PassRateBadge rate={passRate} />
                       </span>
-                      <span className="w-16 shrink-0 text-right text-xs text-slate-500">{formatTime(run.time)}</span>
+                      <span className="w-16 shrink-0 text-right text-xs text-muted-foreground">{formatTime(run.time)}</span>
                     </button>
                     <a
                       href={`${REPORTS_BASE_URL}/${run.indexHtml.replace(/\\/g, '/').replace(/index\.html$/, '').split('/').map(encodeURIComponent).join('/')}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       title="Ver reporte"
-                      className="shrink-0 px-3 py-3 text-slate-300 transition-colors hover:text-blue-500"
+                      className="shrink-0 px-3 py-3 text-muted-foreground/60 transition-colors hover:text-primary"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
@@ -98,29 +98,29 @@ export default function ProductDetail() {
                   </div>
 
                   {isOpen && run.testCases.length > 0 && (
-                    <div className="border-t border-slate-100 bg-slate-50 px-6 py-3">
+                    <div className="border-t border-border bg-muted/40 px-6 py-3">
                       <table className="w-full text-xs">
                         <thead>
-                          <tr className="uppercase tracking-wide text-slate-400">
+                          <tr className="uppercase tracking-wide text-muted-foreground">
                             <th className="pb-2 text-left font-medium">Test Case</th>
                             <th className="w-20 pb-2 text-right font-medium">Duration</th>
                             <th className="w-16 pb-2 text-center font-medium">Status</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100">
+                        <tbody className="divide-y divide-border">
                           {run.testCases.map((tc, ti) => (
                             <tr key={ti} className="group">
                               <td className="py-1.5 pr-4">
-                                <span className="text-slate-700">{tc.name}</span>
+                                <span className="text-foreground">{tc.name}</span>
                                 {tc.failureMessages.length > 0 && (
-                                  <p className="mt-0.5 max-w-xl truncate text-red-500">{tc.failureMessages[0]}</p>
+                                  <p className="mt-0.5 max-w-xl truncate text-destructive">{tc.failureMessages[0]}</p>
                                 )}
                               </td>
-                              <td className="py-1.5 text-right tabular-nums text-slate-500">{formatTime(tc.time)}</td>
+                              <td className="py-1.5 text-right tabular-nums text-muted-foreground">{formatTime(tc.time)}</td>
                               <td className="py-1.5 text-center">
                                 {tc.status === 'passed'
-                                  ? <span className="text-emerald-500">✓</span>
-                                  : <span className="font-bold text-red-500">✗</span>}
+                                  ? <span className="text-[hsl(var(--success))]">✓</span>
+                                  : <span className="font-bold text-destructive">✗</span>}
                               </td>
                             </tr>
                           ))}
@@ -135,8 +135,8 @@ export default function ProductDetail() {
         </CardContent>
       </Card>
 
-      <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
-        <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600">
+      <div className="rounded-lg border border-border bg-muted/40 px-4 py-3">
+        <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
           <span>{formatNumber(d.relatedTestCases.length)} test cases relacionados disponibles en la vista dedicada.</span>
           <Button
             type="button"

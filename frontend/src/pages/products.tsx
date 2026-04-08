@@ -33,7 +33,7 @@ function SubPathBadges({ tags }: { tags: string[] }) {
       {unique.map((tag) => (
         <span
           key={tag}
-          className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-200"
+          className="inline-flex items-center rounded-md border border-border/30 bg-secondary px-2 py-0.5 text-[11px] font-medium text-muted-foreground"
         >
           {tag}
         </span>
@@ -87,49 +87,62 @@ export default function Products() {
   const categories = categoriesQuery.data ?? []
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <PageHeader
-        title="Products"
-        description={categoryFilter ? `Filtrado por categoría: ${categoryFilter}` : 'Resultados agrupados por producto, con número de ejecuciones y tasa de éxito'}
+        title="Productos"
+        description={
+          categoryFilter
+            ? `Listado filtrado por la categoría ${categoryFilter}.`
+            : 'Resultados agrupados por producto, con volumen de ejecuciones y tasa de éxito.'
+        }
       />
-      <div className="flex flex-wrap gap-3">
-        <SearchInput value={search} onChange={(v) => { setSearch(v); pagination.resetPage() }} placeholder="Search products..." className="max-w-sm" />
-        <Select
-          value={categoryFilter ?? ''}
-          onChange={(e) => {
-            const next = e.target.value
-            pagination.resetPage()
-            navigate(next ? `/products?category=${encodeURIComponent(next)}` : '/products')
-          }}
-          className="w-56"
-        >
-          <option value="">Todas las categorías</option>
-          {categories.map((c) => (
-            <option key={c.category} value={c.category}>{c.category}</option>
-          ))}
-        </Select>
-      </div>
-      <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
-        {categoryFilter ? (
-          <>
-            <span>Filtro activo:</span>
-            <Badge variant="secondary">{categoryFilter}</Badge>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="h-7 px-2 text-slate-600"
-              onClick={() => {
-                pagination.resetPage()
-                navigate('/products')
-              }}
-            >
-              Limpiar filtro
-            </Button>
-          </>
-        ) : (
-          <span>Usa el selector para enfocarte en una categoría específica sin salir del listado.</span>
-        )}
+      <div className="rounded-md border border-border/25 bg-card px-4 py-4">
+        <div className="flex flex-wrap gap-3">
+          <SearchInput
+            value={search}
+            onChange={(v) => { setSearch(v); pagination.resetPage() }}
+            placeholder="Buscar productos..."
+            className="max-w-sm"
+          />
+          <Select
+            value={categoryFilter ?? ''}
+            onChange={(e) => {
+              const next = e.target.value
+              pagination.resetPage()
+              navigate(next ? `/products?category=${encodeURIComponent(next)}` : '/products')
+            }}
+            className="h-10 w-56 rounded-md border-border/40 bg-card shadow-none"
+          >
+            <option value="">Todas las categorías</option>
+            {categories.map((c) => (
+              <option key={c.category} value={c.category}>{c.category}</option>
+            ))}
+          </Select>
+        </div>
+        <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+          {categoryFilter ? (
+            <>
+              <span>Filtro activo:</span>
+              <Badge variant="secondary" className="rounded-md border border-border/30 bg-secondary text-muted-foreground">
+                {categoryFilter}
+              </Badge>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-7 rounded-md px-2 text-muted-foreground hover:bg-secondary hover:text-foreground"
+                onClick={() => {
+                  pagination.resetPage()
+                  navigate('/products')
+                }}
+              >
+                Limpiar filtro
+              </Button>
+            </>
+          ) : (
+            <span>Usa los filtros para enfocarte en una categoría específica sin salir del listado.</span>
+          )}
+        </div>
       </div>
       <DataTable
         columns={columns}

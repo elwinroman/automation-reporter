@@ -20,18 +20,19 @@ const navItems = [
   { to: '/test-cases', label: 'Test cases', icon: TestTubes },
   { to: '/flaky-tests', label: 'Flaky Tests', icon: Shuffle },
   { to: '/slowest-tests', label: 'Pruebas mas lentas', icon: Timer },
-  { to: '/failure-analysis', label: 'Análisis de fallos', icon: AlertTriangle },
+  { to: '/failure-analysis', label: 'Analisis de fallos', icon: AlertTriangle },
 ]
 
-export function Sidebar() {
+export function SidebarClassic() {
   const { version, clearVersion } = useVersion()
 
   return (
-    <div className="flex h-full w-64 flex-col border-r bg-card">
-      <div className="flex h-14 items-center border-b px-4">
-        <h1 className="text-lg font-semibold">Reporte Automatización</h1>
+    <aside className="fixed left-0 top-0 z-40 flex h-screen w-64 shrink-0 flex-col gap-2 border-r border-border/50 bg-popover p-4">
+      <div className="mb-8 px-4 py-2">
+        <h1 className="text-lg font-extrabold tracking-tight text-foreground">Automation Reporter</h1>
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Enterprise Reporting</p>
       </div>
-      <ScrollArea className="flex-1 px-3 py-2">
+      <ScrollArea className="flex-1">
         <nav className="flex flex-col gap-1">
           {navItems.map(({ to, label, icon: Icon }) => (
             <NavLink
@@ -39,8 +40,10 @@ export function Sidebar() {
               to={to}
               className={({ isActive }) =>
                 cn(
-                  'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground',
-                  isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground',
+                  'relative flex items-center gap-3 px-4 py-3 text-sm tracking-normal transition-all duration-200',
+                  isActive
+                    ? 'rounded-md bg-card text-primary before:absolute before:left-0 before:h-6 before:w-1 before:rounded-r-md before:bg-primary'
+                    : 'rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground',
                 )
               }
             >
@@ -50,22 +53,22 @@ export function Sidebar() {
           ))}
         </nav>
       </ScrollArea>
-      <Separator />
-      <div className="p-3">
-        <div className="mb-2 rounded-md bg-muted px-3 py-2">
-          <p className="text-xs text-muted-foreground">Version</p>
-          <p className="text-sm font-medium truncate">{version}</p>
+      <div className="mt-auto pt-4">
+        <Separator className="mb-3 bg-border/40" />
+        <div className="mb-3 rounded-md border border-border/40 bg-card px-4 py-3">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Version</p>
+          <p className="mt-1 truncate text-sm font-medium text-foreground">{version}</p>
         </div>
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start gap-2"
+          className="w-full justify-start gap-2 rounded-md px-4 text-muted-foreground hover:bg-secondary hover:text-foreground"
           onClick={clearVersion}
         >
           <ArrowLeft className="h-4 w-4" />
           Change Version
         </Button>
       </div>
-    </div>
+    </aside>
   )
 }

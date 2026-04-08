@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { RouterProvider } from 'react-router'
 import { trpc, trpcClient } from '@/lib/trpc'
+import { ThemeProvider } from '@/context/theme-context'
 import { VersionProvider } from '@/context/version-context'
 import { router } from '@/router'
 
@@ -21,9 +22,11 @@ function App() {
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
-        <VersionProvider>
-          <RouterProvider router={router} />
-        </VersionProvider>
+        <ThemeProvider>
+          <VersionProvider>
+            <RouterProvider router={router} />
+          </VersionProvider>
+        </ThemeProvider>
       </QueryClientProvider>
     </trpc.Provider>
   )

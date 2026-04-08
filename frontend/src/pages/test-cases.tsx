@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router'
+import { ArrowUpRight } from 'lucide-react'
 import { trpc } from '@/lib/trpc'
 import { useVersion } from '@/context/version-context'
 import { formatTime, formatNumber } from '@/lib/format'
@@ -45,9 +46,10 @@ function ProductBadges({
             e.stopPropagation()
             onSelectProduct(product)
           }}
-          className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-200 transition-colors hover:bg-slate-200 hover:text-slate-900"
+          className="inline-flex items-center gap-1 rounded-md border border-border/30 bg-secondary px-2 py-0.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-secondary/80 hover:text-foreground"
         >
           {product}
+          <ArrowUpRight className="h-3 w-3 opacity-70" />
         </button>
       ))}
     </div>
@@ -83,10 +85,10 @@ export default function TestCases() {
   }, [pagination])
 
   const columns: Column<TestCaseRow>[] = [
-    { key: 'testCaseName', header: 'Test Case', sortable: true, render: (r) => <span className="truncate max-w-[300px] block">{r.testCaseName}</span> },
+    { key: 'testCaseName', header: 'Caso de prueba', sortable: true, render: (r) => <span className="block max-w-[300px] truncate">{r.testCaseName}</span> },
     {
       key: 'products',
-      header: 'Products',
+      header: 'Productos',
       render: (r) => (
         <ProductBadges
           products={r.products}
@@ -94,11 +96,11 @@ export default function TestCases() {
         />
       ),
     },
-    { key: 'executionCount', header: 'Runs', sortable: true, className: 'text-right', render: (r) => formatNumber(r.executionCount) },
-    { key: 'passCount', header: 'Passed', sortable: true, className: 'text-right', render: (r) => r.passCount },
-    { key: 'failCount', header: 'Failed', sortable: true, className: 'text-right', render: (r) => r.failCount },
-    { key: 'passRate', header: 'Pass Rate', sortable: true, className: 'text-right', render: (r) => <PassRateBadge rate={r.passRate} /> },
-    { key: 'avgTime', header: 'Avg Time', sortable: true, className: 'text-right', render: (r) => formatTime(r.avgTime) },
+    { key: 'executionCount', header: 'Ejecuciones', sortable: true, className: 'text-right', render: (r) => formatNumber(r.executionCount) },
+    { key: 'passCount', header: 'Exitosos', sortable: true, className: 'text-right', render: (r) => r.passCount },
+    { key: 'failCount', header: 'Fallidos', sortable: true, className: 'text-right', render: (r) => r.failCount },
+    { key: 'passRate', header: 'Tasa de éxito', sortable: true, className: 'text-right', render: (r) => <PassRateBadge rate={r.passRate} /> },
+    { key: 'avgTime', header: 'Tiempo prom.', sortable: true, className: 'text-right', render: (r) => formatTime(r.avgTime) },
   ]
 
   if (query.isLoading) return <TableSkeleton />
@@ -107,21 +109,31 @@ export default function TestCases() {
   const result = query.data!
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <PageHeader
         title="Test Cases"
-        description="Resultados agregados por caso de prueba, con acceso directo a los productos relacionados"
+        description="Resultados agregados por caso de prueba, con acceso directo a los productos relacionados."
       />
-      <div className="flex flex-col gap-4">
-        <Tabs value={statusType} onValueChange={(v) => { setStatusType(v as StatusType); pagination.resetPage() }}>
-          <TabsList>
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="flaky">Flaky</TabsTrigger>
-            <TabsTrigger value="always-passing">Passing</TabsTrigger>
-            <TabsTrigger value="always-failing">Failing</TabsTrigger>
-          </TabsList>
-        </Tabs>
-        <SearchInput value={search} onChange={(v) => { setSearch(v); pagination.resetPage() }} placeholder="Search test cases..." className="max-w-sm" />
+      <div className="rounded-md border border-border/25 bg-card px-4 py-4">
+        <div className="flex flex-col gap-4">
+          <Tabs value={statusType} onValueChange={(v) => { setStatusType(v as StatusType); pagination.resetPage() }}>
+            <TabsList>
+              <TabsTrigger value="all">Todos</TabsTrigger>
+              <TabsTrigger value="flaky">Flaky</TabsTrigger>
+              <TabsTrigger value="always-passing">Estables</TabsTrigger>
+              <TabsTrigger value="always-failing">Fallando</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <SearchInput
+            value={search}
+            onChange={(v) => { setSearch(v); pagination.resetPage() }}
+            placeholder="Buscar casos de prueba..."
+            className="max-w-sm"
+          />
+          <p className="text-sm text-muted-foreground">
+            Filtra por estabilidad o busca un caso específico para revisar su comportamiento entre productos.
+          </p>
+        </div>
       </div>
       <DataTable
         columns={columns}

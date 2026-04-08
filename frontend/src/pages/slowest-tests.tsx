@@ -1,5 +1,6 @@
 ﻿import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
+import { ArrowUpRight } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { trpc } from '@/lib/trpc'
 import { useVersion } from '@/context/version-context'
@@ -67,7 +68,7 @@ export default function SlowestTests() {
   }))
 
   function metricColumnClass(target: Metric) {
-    return target === metric ? 'text-right font-semibold text-slate-900' : 'text-right'
+    return target === metric ? 'text-right font-semibold text-foreground' : 'text-right'
   }
 
   function ProductBadges({ products }: { products: string[] }) {
@@ -83,7 +84,10 @@ export default function SlowestTests() {
               navigate(`/products/${encodeURIComponent(product)}`)
             }}
           >
-            <Badge variant="secondary" className="text-xs hover:bg-slate-200 cursor-pointer">{product}</Badge>
+            <Badge variant="secondary" className="cursor-pointer rounded-md border border-border/30 bg-secondary text-[11px] font-medium text-muted-foreground hover:bg-secondary/80 hover:text-foreground">
+              {product}
+              <ArrowUpRight className="ml-1 h-3 w-3 opacity-70" />
+            </Badge>
           </button>
         ))}
       </div>

@@ -8,15 +8,15 @@ interface PassRateBadgeProps {
 }
 
 const colorClasses = {
-  green: 'bg-emerald-100 text-emerald-800 border-emerald-200',
-  yellow: 'bg-amber-100 text-amber-800 border-amber-200',
-  red: 'bg-red-100 text-red-800 border-red-200',
+  green: 'border-[hsl(var(--success)/0.2)] bg-[hsl(var(--success)/0.12)] text-[hsl(var(--success))]',
+  yellow: 'border-[hsl(var(--warning)/0.2)] bg-[hsl(var(--warning)/0.12)] text-[hsl(var(--warning))]',
+  red: 'border-[hsl(var(--destructive)/0.2)] bg-[hsl(var(--destructive)/0.12)] text-destructive',
 } as const
 
 export function PassRateBadge({ rate, className }: PassRateBadgeProps) {
   const color = passRateColor(rate)
   return (
-    <Badge variant="outline" className={cn(colorClasses[color], className)}>
+    <Badge variant="outline" className={cn('rounded-md px-2 py-0.5 text-[11px] font-semibold tracking-[0.04em]', colorClasses[color], className)}>
       {formatPassRate(rate)}
     </Badge>
   )

@@ -14,25 +14,25 @@ export function DataTablePagination({ total, page, pageSize, onPageChange }: Dat
   const canNext = page < totalPages - 1
 
   return (
-    <div className="flex items-center justify-between px-2">
+    <div className="flex flex-col gap-3 rounded-md border border-border/25 bg-card px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
       <p className="text-sm text-muted-foreground">
-        {total} result{total !== 1 ? 's' : ''}
+        {total} resultado{total !== 1 ? 's' : ''}
       </p>
       <div className="flex items-center gap-2">
         <p className="text-sm text-muted-foreground">
-          Page {page + 1} of {totalPages}
+          Página {page + 1} de {totalPages}
         </p>
         <div className="flex items-center gap-1">
-          <Button variant="outline" size="icon" className="h-8 w-8" disabled={!canPrev} onClick={() => onPageChange(0)}>
+          <Button variant="outline" size="icon" className="h-8 w-8 rounded-md border-border/30 bg-secondary shadow-none" disabled={!canPrev} onClick={() => onPageChange(0)}>
             <ChevronsLeft className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="icon" className="h-8 w-8" disabled={!canPrev} onClick={() => onPageChange(page - 1)}>
+          <Button variant="outline" size="icon" className="h-8 w-8 rounded-md border-border/30 bg-secondary shadow-none" disabled={!canPrev} onClick={() => onPageChange(page - 1)}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="icon" className="h-8 w-8" disabled={!canNext} onClick={() => onPageChange(page + 1)}>
+          <Button variant="outline" size="icon" className="h-8 w-8 rounded-md border-border/30 bg-secondary shadow-none" disabled={!canNext} onClick={() => onPageChange(page + 1)}>
             <ChevronRight className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="icon" className="h-8 w-8" disabled={!canNext} onClick={() => onPageChange(totalPages - 1)}>
+          <Button variant="outline" size="icon" className="h-8 w-8 rounded-md border-border/30 bg-secondary shadow-none" disabled={!canNext} onClick={() => onPageChange(totalPages - 1)}>
             <ChevronsRight className="h-4 w-4" />
           </Button>
         </div>

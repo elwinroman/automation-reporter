@@ -2,7 +2,7 @@ import { createBrowserRouter, Navigate } from 'react-router'
 import { RootLayout } from '@/components/layout/root-layout'
 import { VersionGuard } from '@/components/layout/version-guard'
 import VersionSelector from '@/pages/version-selector'
-import Dashboard from '@/pages/dashboard'
+import DashboardReference from '@/pages/dashboard-reference'
 import Products from '@/pages/products'
 import ProductDetail from '@/pages/product-detail'
 import TestCases from '@/pages/test-cases'
@@ -21,7 +21,7 @@ export const router = createBrowserRouter([
       {
         element: <RootLayout />,
         children: [
-          { path: '/dashboard', element: <Dashboard /> },
+          { path: '/dashboard', element: <DashboardReference /> },
           { path: '/categories', element: <Navigate to="/products" replace /> },
           { path: '/products', element: <Products /> },
           { path: '/products/:product', element: <ProductDetail /> },

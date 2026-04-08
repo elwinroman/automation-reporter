@@ -11,23 +11,23 @@ interface KpiCardProps {
 }
 
 const colorMap: Record<KpiColor, { border: string; text: string }> = {
-  blue:   { border: 'border-t-[3px] border-t-blue-500',    text: 'text-blue-600' },
-  green:  { border: 'border-t-[3px] border-t-emerald-500', text: 'text-emerald-600' },
-  red:    { border: 'border-t-[3px] border-t-red-500',     text: 'text-red-500' },
-  orange: { border: 'border-t-[3px] border-t-amber-400',   text: 'text-amber-500' },
-  gray:   { border: 'border-t-[3px] border-t-slate-300',   text: 'text-slate-700' },
-  purple: { border: 'border-t-[3px] border-t-violet-500',  text: 'text-violet-600' },
+  blue: { border: 'border-t-2 border-t-primary', text: 'text-primary' },
+  green: { border: 'border-t-2 border-t-[hsl(var(--success))]', text: 'text-[hsl(var(--success))]' },
+  red: { border: 'border-t-2 border-t-destructive', text: 'text-destructive' },
+  orange: { border: 'border-t-2 border-t-[hsl(var(--warning))]', text: 'text-[hsl(var(--warning))]' },
+  gray: { border: 'border-t-2 border-t-border', text: 'text-foreground' },
+  purple: { border: 'border-t-2 border-t-[hsl(var(--chart-5))]', text: 'text-[hsl(var(--chart-5))]' },
 }
 
 export function KpiCard({ title, value, color = 'blue', className }: KpiCardProps) {
   const { border, text } = colorMap[color]
   return (
-    <Card className={cn(border, 'rounded-lg shadow-sm', className)}>
-      <CardContent className="px-4 py-3 flex flex-col items-center justify-center text-center gap-1.5 min-h-[86px]">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 leading-tight">
+    <Card className={cn(border, 'rounded-md border border-border/25 bg-card shadow-none', className)}>
+      <CardContent className="flex min-h-[112px] flex-col items-center justify-center gap-2 px-4 py-5 text-center">
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em] leading-tight text-muted-foreground">
           {title}
         </p>
-        <p className={cn('text-2xl font-bold leading-none tabular-nums', text)}>{value}</p>
+        <p className={cn('whitespace-nowrap text-2xl font-extrabold leading-none tabular-nums', text)}>{value}</p>
       </CardContent>
     </Card>
   )

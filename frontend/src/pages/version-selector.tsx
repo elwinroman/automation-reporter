@@ -89,7 +89,7 @@ export default function VersionSelector() {
                 >
                   <CardHeader className="pb-3">
                     <CardTitle className="text-base flex items-center gap-2">
-                      {v.cached && <CheckCircle className="h-4 w-4 text-emerald-500" />}
+                      {v.cached && <CheckCircle className="h-4 w-4 text-[hsl(var(--success))]" />}
                       <span className="truncate">{v.name}</span>
                     </CardTitle>
                   </CardHeader>
