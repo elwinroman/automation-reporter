@@ -11,9 +11,6 @@ import { DataTable, type Column } from '@/components/shared/data-table'
 import { TableSkeleton } from '@/components/shared/loading-skeleton'
 import { ErrorFallback } from '@/components/shared/error-fallback'
 import { Badge } from '@/components/ui/badge'
-import { Tooltip } from '@/components/ui/tooltip'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { usePagination } from '@/hooks/use-pagination'
 
@@ -28,16 +25,13 @@ export default function FailureAnalysis() {
   const navigate = useNavigate()
   const { version } = useVersion()
   const [search, setSearch] = useState('')
-  const [minOccurrences, setMinOccurrences] = useState(1)
-  const [product, setProduct] = useState('')
   const debouncedSearch = useDebouncedValue(search)
   const pagination = usePagination({ pageSize: 20 })
 
   const query = trpc.report.failureAnalysis.useQuery(
     {
       version: version!,
-      minOccurrences,
-      product: product || undefined,
+      minOccurrences: 1,
       search: debouncedSearch || undefined,
       pagination: { limit: pagination.pageSize, offset: pagination.offset },
     },
@@ -51,21 +45,19 @@ export default function FailureAnalysis() {
       key: 'message',
       header: 'Mensaje',
       render: (r) => (
-        <Tooltip content={<div className="max-w-lg whitespace-pre-wrap break-words text-xs leading-5">{r.message}</div>}>
-          <div
-            title={r.message}
-            className="max-w-[460px] rounded-md border border-border/25 bg-secondary px-3 py-2 text-xs leading-5 text-foreground"
-            style={{
-              display: '-webkit-box',
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-              wordBreak: 'break-word',
-            }}
-          >
-            {r.message}
-          </div>
-        </Tooltip>
+        <div
+          title={r.message}
+          className="max-w-[460px] rounded-md border border-border/25 bg-secondary px-3 py-2 text-xs leading-5 text-foreground"
+          style={{
+            display: '-webkit-box',
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            wordBreak: 'break-word',
+          }}
+        >
+          {r.message}
+        </div>
       ),
     },
     {
@@ -79,18 +71,9 @@ export default function FailureAnalysis() {
       header: 'Tests afectados',
       className: 'text-right',
       render: (r) => (
-        <Tooltip
-          content={
-            <div className="max-w-sm space-y-1">
-              {r.affectedTests.slice(0, 10).map((t) => <div key={t} className="break-words text-xs">{t}</div>)}
-              {r.affectedTests.length > 10 && <div className="text-xs">...y {r.affectedTests.length - 10} mas</div>}
-            </div>
-          }
-        >
-          <Badge variant="secondary" className="rounded-md border border-border/30 bg-secondary text-[11px] font-medium text-muted-foreground">
-            {r.affectedTests.length}
-          </Badge>
-        </Tooltip>
+        <Badge variant="secondary" className="rounded-md border border-border/30 bg-secondary text-[11px] font-medium text-muted-foreground">
+          {r.affectedTests.length}
+        </Badge>
       ),
     },
     {
@@ -123,34 +106,11 @@ export default function FailureAnalysis() {
   return (
     <div className="space-y-5">
       <PageHeader
-        title="Failure Analysis"
+        title="Análisis de fallos"
         description="Fallos agrupados por mensaje para detectar patrones repetidos y acceder rapido a los productos afectados."
       />
       <div className="rounded-md border border-border/25 bg-card px-4 py-4">
         <div className="flex flex-wrap items-end gap-3">
-          <div>
-            <label className="mb-1 block text-xs font-medium text-muted-foreground">Min. ocurrencias</label>
-            <Input
-              type="number"
-              min={1}
-              value={minOccurrences}
-              onChange={(e) => {
-                setMinOccurrences(Number(e.target.value) || 1)
-                pagination.resetPage()
-              }}
-              className="h-10 w-32 rounded-md border-border/40 bg-card shadow-none"
-            />
-          </div>
-          <Input
-            type="text"
-            placeholder="Filtrar por producto..."
-            value={product}
-            onChange={(e) => {
-              setProduct(e.target.value)
-              pagination.resetPage()
-            }}
-            className="h-10 w-48 rounded-md border-border/40 bg-card shadow-none"
-          />
           <SearchInput
             value={search}
             onChange={(v) => {
@@ -161,30 +121,8 @@ export default function FailureAnalysis() {
             className="max-w-sm"
           />
         </div>
-        <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-          {product ? (
-            <>
-              <span>Filtro activo:</span>
-              <Badge variant="secondary" className="rounded-md border border-border/30 bg-secondary text-muted-foreground">
-                {product}
-              </Badge>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-7 rounded-md px-2 text-muted-foreground hover:bg-secondary hover:text-foreground"
-                onClick={() => {
-                  setProduct('')
-                  pagination.resetPage()
-                }}
-              >
-                Limpiar filtro
-              </Button>
-            </>
-          ) : null}
-        </div>
         <p className="mt-3 text-sm text-muted-foreground">
-          Pasa el cursor sobre el mensaje o el conteo de tests para ver mas detalle, y usa los badges para ir al producto afectado.
+          Usa los badges para ir al producto afectado.
         </p>
       </div>
       <DataTable

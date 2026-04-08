@@ -68,13 +68,14 @@ export const flakyTestsInputSchema = z.object({
 export const slowestTestsInputSchema = z.object({
   version: z.string().min(1),
   topN: z.number().int().min(1).max(100).default(10),
-  metric: z.enum(['avgTime', 'maxTime', 'totalTime']).default('avgTime'),
+  sortBy: z.object({
+    field: z.enum(['executionCount', 'avgTime', 'maxTime', 'totalTime', 'minTime']).default('avgTime'),
+    direction: sortDirectionSchema,
+  }).default({ field: 'avgTime', direction: 'desc' }),
 });
 
 export const failureAnalysisInputSchema = z.object({
   version: z.string().min(1),
-  minOccurrences: z.number().int().min(1).default(1),
-  product: z.string().optional(),
   search: z.string().optional(),
   pagination: paginationSchema.default({ limit: 50, offset: 0 }),
 });

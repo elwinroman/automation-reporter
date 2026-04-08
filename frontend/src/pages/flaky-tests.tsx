@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+﻿import { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router'
 import { ArrowUpRight } from 'lucide-react'
 import { trpc } from '@/lib/trpc'
@@ -10,6 +10,7 @@ import { PassRateBadge } from '@/components/shared/pass-rate-badge'
 import { TableSkeleton } from '@/components/shared/loading-skeleton'
 import { ErrorFallback } from '@/components/shared/error-fallback'
 import { Badge } from '@/components/ui/badge'
+import { Tooltip } from '@/components/ui/tooltip'
 import { usePagination } from '@/hooks/use-pagination'
 
 type SortField = 'testCaseName' | 'passRate' | 'executionCount' | 'failCount';
@@ -22,6 +23,9 @@ interface FlakyRow {
   passRate: number;
   products: string[];
 }
+
+const compactHeaderClassName = 'text-[10px] tracking-[0.14em]'
+const compactHeaderButtonClassName = 'text-[10px] tracking-[0.12em]'
 
 export default function FlakyTests() {
   const { version } = useVersion()
@@ -47,13 +51,57 @@ export default function FlakyTests() {
   }, [pagination])
 
   const columns: Column<FlakyRow>[] = [
-    { key: 'testCaseName', header: 'Caso de prueba', sortable: true, render: (r) => <span className="block max-w-[300px] truncate">{r.testCaseName}</span> },
-    { key: 'executionCount', header: 'Ejecuciones', sortable: true, className: 'text-right', render: (r) => formatNumber(r.executionCount) },
-    { key: 'passCount', header: 'Exitosos', className: 'text-right', render: (r) => r.passCount },
-    { key: 'failCount', header: 'Fallidos', sortable: true, className: 'text-right', render: (r) => <span className="font-medium text-destructive">{r.failCount}</span> },
-    { key: 'passRate', header: 'Tasa de éxito', sortable: true, className: 'text-right', render: (r) => <PassRateBadge rate={r.passRate} /> },
     {
-      key: 'products', header: 'Productos', render: (r) => (
+      key: 'testCaseName',
+      header: 'Test Case',
+      sortable: true,
+      headerClassName: compactHeaderClassName,
+      headerButtonClassName: compactHeaderButtonClassName,
+      render: (r) => (
+        <Tooltip content={<div className="max-w-md break-words text-xs">{r.testCaseName}</div>}>
+          <span className="block max-w-[300px] truncate">{r.testCaseName}</span>
+        </Tooltip>
+      ),
+    },
+    {
+      key: 'executionCount',
+      header: 'Runs',
+      sortable: true,
+      className: 'text-right',
+      headerClassName: compactHeaderClassName,
+      headerButtonClassName: compactHeaderButtonClassName,
+      render: (r) => formatNumber(r.executionCount),
+    },
+    {
+      key: 'passCount',
+      header: 'Passed',
+      className: 'text-right',
+      headerClassName: compactHeaderClassName,
+      render: (r) => r.passCount,
+    },
+    {
+      key: 'failCount',
+      header: 'Failed',
+      sortable: true,
+      className: 'text-right',
+      headerClassName: compactHeaderClassName,
+      headerButtonClassName: compactHeaderButtonClassName,
+      render: (r) => <span className="font-medium text-destructive">{r.failCount}</span>,
+    },
+    {
+      key: 'passRate',
+      header: 'Pass Rate',
+      sortable: true,
+      className: 'text-right',
+      headerClassName: compactHeaderClassName,
+      headerButtonClassName: compactHeaderButtonClassName,
+      render: (r) => <PassRateBadge rate={r.passRate} />,
+    },
+    {
+      key: 'products',
+      header: 'Products',
+      headerClassName: compactHeaderClassName,
+      render: (r) => (
         <div className="flex flex-wrap gap-1">
           {[...new Set(r.products)].map((p) => (
             <button
@@ -82,7 +130,7 @@ export default function FlakyTests() {
       <PageHeader title="Flaky Tests" description="Casos con comportamiento inestable entre ejecuciones, ordenados para identificar ruido y regresiones intermitentes." />
       <div className="rounded-md border border-border/25 bg-card px-4 py-4">
         <p className="text-sm text-muted-foreground">
-          Revisa primero los casos con menor tasa de éxito y más fallos acumulados. Los badges de producto te llevan al detalle relacionado.
+          Revisa primero los casos con menor tasa de exito y mas fallos acumulados. Los badges de producto te llevan al detalle relacionado.
         </p>
       </div>
       <DataTable
@@ -98,3 +146,4 @@ export default function FlakyTests() {
     </div>
   )
 }
+

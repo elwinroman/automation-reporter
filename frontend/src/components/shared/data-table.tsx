@@ -10,6 +10,8 @@ export interface Column<T> {
   header: string;
   sortable?: boolean;
   className?: string;
+  headerClassName?: string;
+  headerButtonClassName?: string;
   render: (row: T) => ReactNode;
 }
 
@@ -24,7 +26,6 @@ interface DataTableProps<T> {
   sort?: SortState;
   onSort?: (field: string) => void;
   onRowClick?: (row: T) => void;
-  // Server-side pagination
   total?: number;
   page?: number;
   pageSize?: number;
@@ -58,12 +59,18 @@ export function DataTable<T>({
           <TableHeader>
             <TableRow className="border-b border-border/25 bg-secondary hover:bg-secondary">
               {columns.map((col) => (
-                <TableHead key={col.key} className={cn('h-12 px-4 text-[11px] font-semibold uppercase tracking-[0.18em]', col.className)}>
+                <TableHead
+                  key={col.key}
+                  className={cn('h-12 px-4 text-[11px] font-semibold uppercase tracking-[0.18em]', col.className, col.headerClassName)}
+                >
                   {col.sortable && onSort ? (
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="-ml-3 h-8 rounded-md px-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground hover:bg-transparent hover:text-foreground"
+                      className={cn(
+                        '-ml-3 h-8 rounded-md px-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground hover:bg-transparent hover:text-foreground',
+                        col.headerButtonClassName,
+                      )}
                       onClick={() => onSort(col.key)}
                     >
                       {col.header}

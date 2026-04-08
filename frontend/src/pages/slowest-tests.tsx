@@ -12,14 +12,41 @@ import { ErrorFallback } from '@/components/shared/error-fallback'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
+import { Tooltip as UiTooltip } from '@/components/ui/tooltip'
 
-type Metric = 'avgTime' | 'maxTime' | 'totalTime'
 type SortField = 'testCaseName' | 'executionCount' | 'avgTime' | 'maxTime' | 'totalTime' | 'minTime'
+type ChartMetric = 'executionCount' | 'avgTime' | 'maxTime' | 'totalTime' | 'minTime'
 
-const metricLabels: Record<Metric, string> = {
-  avgTime: 'Average Time',
+const chartLabels: Record<ChartMetric, string> = {
+  executionCount: 'Runs',
+  avgTime: 'Avg Time',
   maxTime: 'Max Time',
   totalTime: 'Total Time',
+  minTime: 'Min Time',
+}
+
+const chartAxisColor = 'hsl(var(--muted-foreground))'
+const chartGridColor = 'hsl(var(--border) / 0.35)'
+const chartBarColor = 'hsl(var(--primary))'
+const chartTooltipStyle = {
+  backgroundColor: 'hsl(var(--card))',
+  border: '1px solid hsl(var(--border) / 0.8)',
+  borderRadius: '0.2rem',
+  boxShadow: '0 10px 30px hsl(0 0% 0% / 0.18)',
+  color: 'hsl(var(--card-foreground))',
+  fontSize: '11px',
+  padding: '10px 12px',
+}
+const chartTooltipLabelStyle = {
+  color: 'hsl(var(--foreground))',
+  fontSize: '11px',
+  fontWeight: 600,
+  marginBottom: '2px',
+}
+const chartTooltipItemStyle = {
+  color: 'hsl(var(--card-foreground))',
+  fontSize: '11px',
+  padding: 0,
 }
 
 interface TestRow {
@@ -35,17 +62,20 @@ interface TestRow {
 export default function SlowestTests() {
   const navigate = useNavigate()
   const { version } = useVersion()
-  const [metric, setMetric] = useState<Metric>('avgTime')
   const [topN, setTopN] = useState(10)
   const [sort, setSort] = useState<{ field: SortField; direction: 'asc' | 'desc' }>({
     field: 'avgTime',
     direction: 'desc',
   })
 
+  const backendSort = sort.field === 'testCaseName'
+    ? { field: 'totalTime' as const, direction: 'desc' as const }
+    : { field: sort.field, direction: sort.direction }
+
   const query = trpc.report.slowestTests.useQuery({
     version: version!,
-    metric,
     topN,
+    sortBy: backendSort,
   })
 
   const data = query.data ?? []
@@ -62,13 +92,19 @@ export default function SlowestTests() {
   if (query.isLoading) return <LoadingSkeleton />
   if (query.isError) return <ErrorFallback message={query.error.message} onRetry={() => query.refetch()} />
 
+  const chartMetric: ChartMetric = sort.field === 'testCaseName' ? 'totalTime' : sort.field
   const chartData = sortedData.map((d) => ({
     name: d.testCaseName.length > 30 ? d.testCaseName.slice(0, 30) + '...' : d.testCaseName,
-    value: d[metric],
+    fullName: d.testCaseName,
+    value: d[chartMetric],
   }))
 
-  function metricColumnClass(target: Metric) {
-    return target === metric ? 'text-right font-semibold text-foreground' : 'text-right'
+  function formatChartValue(value: number) {
+    return chartMetric === 'executionCount' ? value.toString() : formatTime(value)
+  }
+
+  function metricColumnClass(target: 'avgTime' | 'maxTime' | 'totalTime') {
+    return target === chartMetric ? 'text-right font-semibold text-foreground' : 'text-right'
   }
 
   function ProductBadges({ products }: { products: string[] }) {
@@ -107,9 +143,11 @@ export default function SlowestTests() {
       header: 'Test Case',
       sortable: true,
       render: (r) => (
-        <span className="truncate max-w-[300px] block" title={r.testCaseName}>
-          {r.testCaseName}
-        </span>
+        <UiTooltip content={<div className="max-w-md break-words text-xs">{r.testCaseName}</div>}>
+          <span className="truncate max-w-[300px] block">
+            {r.testCaseName}
+          </span>
+        </UiTooltip>
       ),
     },
     { key: 'products', header: 'Products', render: (r) => <ProductBadges products={r.products} /> },
@@ -122,21 +160,8 @@ export default function SlowestTests() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Slowest Tests" description="Ranking de pruebas más lentas, con acceso directo a los productos relacionados" />
+      <PageHeader title="Pruebas mas lentas" description="Ranking de pruebas más lentas, con acceso directo a los productos relacionados" />
       <div className="flex gap-3">
-        <Select
-          value={metric}
-          onChange={(e) => {
-            const nextMetric = e.target.value as Metric
-            setMetric(nextMetric)
-            setSort({ field: nextMetric, direction: 'desc' })
-          }}
-          className="w-48"
-        >
-          {(Object.keys(metricLabels) as Metric[]).map((m) => (
-            <option key={m} value={m}>{metricLabels[m]}</option>
-          ))}
-        </Select>
         <Select value={String(topN)} onChange={(e) => setTopN(Number(e.target.value))} className="w-32">
           {[5, 10, 20, 50].map((n) => (
             <option key={n} value={n}>Top {n}</option>
@@ -145,17 +170,40 @@ export default function SlowestTests() {
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle className="text-base">{metricLabels[metric]}</CardTitle>
+        <CardHeader className="px-4 pb-3 sm:px-6">
+          <CardTitle className="text-base">{chartLabels[chartMetric]}</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-4 pb-5 sm:px-6">
           <ResponsiveContainer width="100%" height={Math.max(300, chartData.length * 35)}>
-            <BarChart data={chartData} layout="vertical" margin={{ left: 150 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis type="number" tickFormatter={(value: number) => formatTime(value)} />
-              <YAxis type="category" dataKey="name" width={220} tick={{ fontSize: 11 }} />
-              <Tooltip formatter={(value: number) => formatTime(value)} />
-              <Bar dataKey="value" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+            <BarChart data={chartData} layout="vertical" margin={{ top: 8, right: 8, bottom: 8, left: 12 }}>
+              <CartesianGrid stroke={chartGridColor} strokeDasharray="3 3" />
+              <XAxis
+                type="number"
+                tickFormatter={(value: number) => formatChartValue(value)}
+                tick={{ fontSize: 10, fill: chartAxisColor }}
+                axisLine={{ stroke: chartGridColor }}
+                tickLine={{ stroke: chartGridColor }}
+              />
+              <YAxis
+                type="category"
+                dataKey="name"
+                width={176}
+                tick={{ fontSize: 10, fill: chartAxisColor }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <Tooltip
+                formatter={(value: number) => [formatChartValue(value), 'Time']}
+                labelFormatter={(_label, payload) => {
+                  const item = payload?.[0]?.payload as { fullName?: string } | undefined
+                  return item?.fullName ?? ''
+                }}
+                contentStyle={chartTooltipStyle}
+                labelStyle={chartTooltipLabelStyle}
+                itemStyle={chartTooltipItemStyle}
+                cursor={{ fill: 'hsl(var(--primary) / 0.08)' }}
+              />
+              <Bar dataKey="value" fill={chartBarColor} radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>

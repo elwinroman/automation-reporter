@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+﻿import { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router'
 import { keepPreviousData } from '@tanstack/react-query'
 import { ArrowUpRight } from 'lucide-react'
@@ -12,6 +12,7 @@ import { PassRateBadge } from '@/components/shared/pass-rate-badge'
 import { TableSkeleton } from '@/components/shared/loading-skeleton'
 import { ErrorFallback } from '@/components/shared/error-fallback'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tooltip } from '@/components/ui/tooltip'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { usePagination } from '@/hooks/use-pagination'
 
@@ -27,6 +28,9 @@ interface TestCaseRow {
   avgTime: number;
   products: string[];
 }
+
+const compactHeaderClassName = 'text-[10px] tracking-[0.14em]'
+const compactHeaderButtonClassName = 'text-[10px] tracking-[0.12em]'
 
 function ProductBadges({
   products,
@@ -91,10 +95,22 @@ export default function TestCases() {
   }, [pagination])
 
   const columns: Column<TestCaseRow>[] = [
-    { key: 'testCaseName', header: 'Caso de prueba', sortable: true, render: (r) => <span className="block max-w-[300px] truncate">{r.testCaseName}</span> },
+    {
+      key: 'testCaseName',
+      header: 'Test Case',
+      sortable: true,
+      headerClassName: compactHeaderClassName,
+      headerButtonClassName: compactHeaderButtonClassName,
+      render: (r) => (
+        <Tooltip content={<div className="max-w-md break-words text-xs">{r.testCaseName}</div>}>
+          <span className="block max-w-[300px] truncate">{r.testCaseName}</span>
+        </Tooltip>
+      ),
+    },
     {
       key: 'products',
-      header: 'Productos',
+      header: 'Products',
+      headerClassName: compactHeaderClassName,
       render: (r) => (
         <ProductBadges
           products={r.products}
@@ -102,11 +118,51 @@ export default function TestCases() {
         />
       ),
     },
-    { key: 'executionCount', header: 'Ejecuciones', sortable: true, className: 'text-right', render: (r) => formatNumber(r.executionCount) },
-    { key: 'passCount', header: 'Exitosos', sortable: true, className: 'text-right', render: (r) => r.passCount },
-    { key: 'failCount', header: 'Fallidos', sortable: true, className: 'text-right', render: (r) => r.failCount },
-    { key: 'passRate', header: 'Tasa de éxito', sortable: true, className: 'text-right', render: (r) => <PassRateBadge rate={r.passRate} /> },
-    { key: 'avgTime', header: 'Tiempo prom.', sortable: true, className: 'text-right', render: (r) => formatTime(r.avgTime) },
+    {
+      key: 'executionCount',
+      header: 'Runs',
+      sortable: true,
+      className: 'text-right',
+      headerClassName: compactHeaderClassName,
+      headerButtonClassName: compactHeaderButtonClassName,
+      render: (r) => formatNumber(r.executionCount),
+    },
+    {
+      key: 'passCount',
+      header: 'Passed',
+      sortable: true,
+      className: 'text-right',
+      headerClassName: compactHeaderClassName,
+      headerButtonClassName: compactHeaderButtonClassName,
+      render: (r) => r.passCount,
+    },
+    {
+      key: 'failCount',
+      header: 'Failed',
+      sortable: true,
+      className: 'text-right',
+      headerClassName: compactHeaderClassName,
+      headerButtonClassName: compactHeaderButtonClassName,
+      render: (r) => r.failCount,
+    },
+    {
+      key: 'passRate',
+      header: 'Pass Rate',
+      sortable: true,
+      className: 'text-right',
+      headerClassName: compactHeaderClassName,
+      headerButtonClassName: compactHeaderButtonClassName,
+      render: (r) => <PassRateBadge rate={r.passRate} />,
+    },
+    {
+      key: 'avgTime',
+      header: 'Avg Time',
+      sortable: true,
+      className: 'text-right',
+      headerClassName: compactHeaderClassName,
+      headerButtonClassName: compactHeaderButtonClassName,
+      render: (r) => formatTime(r.avgTime),
+    },
   ]
 
   if (query.isLoading && !query.data) return <TableSkeleton />
@@ -137,7 +193,7 @@ export default function TestCases() {
             className="max-w-sm"
           />
           <p className="text-sm text-muted-foreground">
-            Filtra por estabilidad o busca un caso específico para revisar su comportamiento entre productos.
+            Filtra por estabilidad o busca un caso especifico para revisar su comportamiento entre productos.
           </p>
         </div>
       </div>
@@ -154,3 +210,4 @@ export default function TestCases() {
     </div>
   )
 }
+

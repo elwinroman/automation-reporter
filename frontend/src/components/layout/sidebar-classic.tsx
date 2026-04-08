@@ -66,7 +66,7 @@ export function SidebarClassic() {
           onClick={clearVersion}
         >
           <ArrowLeft className="h-4 w-4" />
-          Change Version
+          Cambiar Version
         </Button>
       </div>
     </aside>

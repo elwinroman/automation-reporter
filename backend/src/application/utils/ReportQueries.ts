@@ -92,12 +92,13 @@ export interface FlakyTestsFilters {
 
 export interface SlowestTestsFilters {
   topN?: number;
-  metric?: 'avgTime' | 'maxTime' | 'totalTime';
+  sortBy?: {
+    field: 'executionCount' | 'avgTime' | 'maxTime' | 'totalTime' | 'minTime';
+    direction: 'asc' | 'desc';
+  };
 }
 
 export interface FailureAnalysisFilters {
-  minOccurrences?: number;
-  product?: string;
   search?: string;
   pagination?: PaginationConfig;
 }
@@ -352,10 +353,12 @@ export function querySlowestTests(
   filters?: SlowestTestsFilters,
 ): AggregatedTestCase[] {
   const topN = filters?.topN ?? 10
-  const metric = filters?.metric ?? 'avgTime'
+  const field = filters?.sortBy?.field ?? 'avgTime'
+  const direction = filters?.sortBy?.direction ?? 'desc'
+  const multiplier = direction === 'asc' ? 1 : -1
 
   return [...report.testCases]
-    .sort((a, b) => b[metric] - a[metric])
+    .sort((a, b) => (a[field] - b[field]) * multiplier)
     .slice(0, topN)
 }
 
@@ -370,16 +373,7 @@ export function queryFailureAnalysis(
     products: Set<string>;
   }>()
 
-  let testCases = report.testCases
-
-  if (filters?.product) {
-    const prod = normalizeText(filters.product)
-    testCases = testCases.filter((tc) =>
-      tc.products.some((p) => normalizeText(p) === prod),
-    )
-  }
-
-  for (const tc of testCases) {
+  for (const tc of report.testCases) {
     for (const msg of tc.distinctFailureMessages) {
       let entry = messageMap.get(msg)
       if (!entry) {
@@ -400,9 +394,6 @@ export function queryFailureAnalysis(
     affectedTests: [...entry.tests].sort(),
     affectedProducts: [...entry.products].sort(),
   }))
-
-  const minOccurrences = filters?.minOccurrences ?? 1
-  result = result.filter((fg) => fg.occurrences >= minOccurrences)
 
   if (filters?.search) {
     const needle = normalizeText(filters.search)

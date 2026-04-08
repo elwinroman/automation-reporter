@@ -27,7 +27,7 @@ function Tooltip({ content, children, side = 'top' }: TooltipProps) {
       {open && (
         <div
           className={cn(
-            'absolute z-50 max-w-xs overflow-hidden rounded-md border border-border/30 bg-card px-3 py-2 text-xs text-card-foreground shadow-sm animate-in fade-in-0 zoom-in-95',
+            'absolute z-50 max-w-lg overflow-hidden rounded-md border border-border/60 bg-card px-3.5 py-2.5 text-xs text-card-foreground shadow-lg shadow-black/25 ring-1 ring-white/10 animate-in fade-in-0 zoom-in-95',
             positionClasses[side],
           )}
         >
