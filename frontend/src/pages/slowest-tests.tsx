@@ -210,7 +210,7 @@ export default function SlowestTests() {
         </UiTooltip>
       ),
     },
-    { key: 'products', header: 'Products', render: (r) => <ProductBadges products={r.products} /> },
+    { key: 'products', header: 'Ejecuciones', render: (r) => <ProductBadges products={r.products} /> },
     { key: 'executionCount', header: 'Runs', sortable: true, className: 'text-right', render: (r) => r.executionCount },
     { key: 'avgTime', header: 'Avg Time', sortable: true, className: metricColumnClass('avgTime'), render: (r) => formatTime(r.avgTime) },
     { key: 'maxTime', header: 'Max Time', sortable: true, className: metricColumnClass('maxTime'), render: (r) => formatTime(r.maxTime) },
@@ -220,7 +220,7 @@ export default function SlowestTests() {
   const productColumns: Column<ProductRow>[] = [
     {
       key: 'product',
-      header: 'Product',
+      header: 'Ejecucion',
       sortable: true,
       render: (r) => (
         <UiTooltip content={<div className="max-w-md break-words text-xs">{r.product}</div>}>
@@ -237,13 +237,13 @@ export default function SlowestTests() {
   return (
     <div className="space-y-6">
       <PageHeader
-        description="Analisis de tiempos de ejecucion por caso de prueba y por producto. Usa los tabs para cambiar de perspectiva y detectar si la lentitud esta concentrada en pruebas puntuales o en componentes completos del flujo."
+        description="Analisis de tiempos de ejecucion por caso de prueba y por ejecucion. Usa los tabs para cambiar de perspectiva y detectar si la lentitud esta concentrada en pruebas puntuales o en componentes completos del flujo."
       />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Tabs value={view} onValueChange={(value) => setView(value as 'test-cases' | 'products')}>
           <TabsList>
             <TabsTrigger value="test-cases">Test Cases</TabsTrigger>
-            <TabsTrigger value="products">Products</TabsTrigger>
+            <TabsTrigger value="products">Ejecuciones</TabsTrigger>
           </TabsList>
         </Tabs>
         <Select value={String(topN)} onChange={(e) => setTopN(Number(e.target.value))} className="w-32">

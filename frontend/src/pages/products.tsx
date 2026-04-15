@@ -83,7 +83,7 @@ export default function Products() {
   const columns: Column<ProductRow>[] = [
     {
       key: 'product',
-      header: 'Product',
+      header: 'Ejecucion',
       sortable: true,
       headerClassName: compactHeaderClassName,
       headerButtonClassName: compactHeaderButtonClassName,
@@ -134,8 +134,8 @@ export default function Products() {
       <PageHeader
         description={
           categoryFilter
-            ? `Vista enfocada en la categoria ${categoryFilter}. Aqui puedes comparar productos por volumen de ejecuciones, tasa de exito y subruta operativa para detectar donde se concentra la actividad y que grupo necesita revision.`
-            : 'Listado consolidado por producto. Sirve para comparar carga de ejecuciones, estabilidad general y contexto de subruta en una sola tabla antes de entrar al detalle de cada producto.'
+            ? `Vista enfocada en la categoria ${categoryFilter}. Aqui puedes comparar ejecuciones por volumen, tasa de exito y subruta operativa para detectar donde se concentra la actividad y que grupo necesita revision.`
+            : 'Listado consolidado por ejecucion. Sirve para comparar carga, estabilidad general y contexto de subruta en una sola tabla antes de entrar al detalle de cada ejecucion.'
         }
       />
       <div className="rounded-md border border-border/25 bg-card px-4 py-4">
@@ -143,7 +143,7 @@ export default function Products() {
           <SearchInput
             value={search}
             onChange={(v) => { setSearch(v); pagination.resetPage() }}
-            placeholder="Buscar productos..."
+            placeholder="Buscar ejecuciones..."
             className="max-w-sm"
           />
           <Select

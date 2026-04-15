@@ -34,7 +34,7 @@ export default function ProductDetail() {
       <PageHeader title={d.product} description={d.category} />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <KpiCard title="Producto" value={d.product} color="gray" />
+        <KpiCard title="Ejecucion" value={d.product} color="gray" />
         <KpiCard title="Categoría" value={d.category} color="blue" />
         <KpiCard title="Nro ejecuciones" value={formatNumber(d.executionCount)} color="blue" />
         <KpiCard title="Tasa de éxito" value={`${d.passRate.toFixed(1)}%`} color="green" />

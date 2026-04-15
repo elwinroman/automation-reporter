@@ -109,7 +109,7 @@ export default function TestCases() {
     },
     {
       key: 'products',
-      header: 'Products',
+      header: 'Ejecuciones',
       headerClassName: compactHeaderClassName,
       render: (r) => (
         <ProductBadges
@@ -173,7 +173,7 @@ export default function TestCases() {
   return (
     <div className="space-y-5">
       <PageHeader
-        description="Resultados agregados por caso de prueba a traves de multiples ejecuciones. Esta vista te ayuda a identificar frecuencia de uso, estabilidad, tiempo promedio y relacion con productos concretos sin perder el contexto comparativo."
+        description="Resultados agregados por caso de prueba a traves de multiples ejecuciones. Esta vista te ayuda a identificar frecuencia de uso, estabilidad, tiempo promedio y relacion con ejecuciones concretas sin perder el contexto comparativo."
       />
       <div className="rounded-md border border-border/25 bg-card px-4 py-4">
         <div className="flex flex-col gap-4">
@@ -192,7 +192,7 @@ export default function TestCases() {
             className="max-w-sm"
           />
           <p className="text-sm text-muted-foreground">
-            Filtra por estabilidad o busca un caso especifico para revisar su comportamiento entre productos.
+            Filtra por estabilidad o busca un caso especifico para revisar su comportamiento entre ejecuciones.
           </p>
         </div>
       </div>

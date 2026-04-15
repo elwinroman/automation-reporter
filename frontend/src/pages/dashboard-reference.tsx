@@ -98,7 +98,7 @@ export default function DashboardReference() {
       </section>
 
       <section className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-8">
-        <KpiCard title="E2E Execs" value={formatNumber(s.totalExecutions)} color="gray" />
+        <KpiCard title="Execs" value={formatNumber(s.totalExecutions)} color="gray" />
         <KpiCard title="Unique Cases" value={formatNumber(s.uniqueTestCases)} color="gray" />
         <KpiCard title="Case Runs" value={formatNumber(s.totalTestCases)} color="gray" />
         <KpiCard title="Success" value={formatNumber(s.totalPassed)} color="blue" />

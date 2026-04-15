@@ -239,6 +239,12 @@ El frontend se comunica con el backend exclusivamente via tRPC con type-safety c
 
 Aplicacion React para visualizar los reportes de forma interactiva.
 
+Nota semantica:
+
+- en la UI actual se usa el termino `Ejecucion` como reemplazo visible de `Producto`
+- internamente la logica todavia usa `product` como nombre tecnico y clave de agregacion
+- ver [docs/execution-concept.md](./docs/execution-concept.md) para el contexto y el posible refactor futuro
+
 ### Iniciar frontend
 
 ```bash
@@ -265,7 +271,7 @@ cd frontend && pnpm dev:network
 
 - Selector de version
 - Dashboard con metricas principales
-- Exploracion de categorias, productos y test cases
+- Exploracion de categorias, ejecuciones y test cases
 - Analisis de flaky tests, pruebas lentas y fallos
 - Integracion type-safe con tRPC
 

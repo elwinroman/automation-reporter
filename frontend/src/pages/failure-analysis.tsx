@@ -77,7 +77,7 @@ export default function FailureAnalysis() {
     },
     {
       key: 'affectedProducts',
-      header: 'Productos afectados',
+      header: 'Ejecuciones afectadas',
       render: (r) => (
         <div className="flex flex-wrap gap-1">
           {r.affectedProducts.map((p) => (
@@ -105,7 +105,7 @@ export default function FailureAnalysis() {
   return (
     <div className="space-y-5">
       <PageHeader
-        description="Vista agrupada por mensaje de error para detectar patrones repetidos, medir su impacto y ubicar rapidamente que productos y cuantos casos estan siendo afectados por cada tipo de fallo."
+        description="Vista agrupada por mensaje de error para detectar patrones repetidos, medir su impacto y ubicar rapidamente que ejecuciones y cuantos casos estan siendo afectados por cada tipo de fallo."
       />
       <div className="rounded-md border border-border/25 bg-card px-4 py-4">
         <div className="flex flex-wrap items-end gap-3">
@@ -120,7 +120,7 @@ export default function FailureAnalysis() {
           />
         </div>
         <p className="mt-3 text-sm text-muted-foreground">
-          Usa los badges para ir al producto afectado.
+          Usa los badges para ir a la ejecucion afectada.
         </p>
       </div>
       <DataTable

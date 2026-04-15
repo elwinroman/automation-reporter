@@ -20,12 +20,38 @@ fi
 
 ENV_FILES="--env-file .env.docker"
 
+backend_port="$(grep '^BACKEND_PORT=' .env.docker | cut -d= -f2)"
+frontend_port="$(grep '^FRONTEND_PORT=' .env.docker | cut -d= -f2)"
+backend_port="${backend_port:-3000}"
+frontend_port="${frontend_port:-8080}"
+
+find_port_owner() {
+  local port="$1"
+  docker ps --filter "publish=${port}" --format '{{.Names}}'
+}
+
+assert_port_available() {
+  local port="$1"
+  local owners
+
+  owners="$(find_port_owner "$port")"
+  if [ -n "$owners" ]; then
+    echo "El puerto ${port} sigue ocupado por estos contenedores:"
+    echo "$owners"
+    echo "Libera ese puerto o cambia ${port} en .env.docker antes de desplegar."
+    exit 1
+  fi
+}
+
 echo ">>> Deteniendo backend y frontend..."
-docker compose $ENV_FILES stop backend frontend || true
-docker compose $ENV_FILES rm -f backend frontend || true
+docker compose $ENV_FILES down --remove-orphans || true
+
+echo ">>> Verificando puertos..."
+assert_port_available "$backend_port"
+assert_port_available "$frontend_port"
 
 echo ">>> Rebuild y deploy..."
-docker compose $ENV_FILES up -d --build
+docker compose $ENV_FILES up -d --build --force-recreate
 docker image prune -f
 
 if [ -n "${APP_VERSION:-}" ]; then

@@ -16,7 +16,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/products', label: 'Productos', icon: Package },
+  { to: '/products', label: 'Ejecuciones', icon: Package },
   { to: '/test-cases', label: 'Test cases', icon: TestTubes },
   { to: '/flaky-tests', label: 'Flaky Tests', icon: Shuffle },
   { to: '/slowest-tests', label: 'Pruebas mas lentas', icon: Timer },

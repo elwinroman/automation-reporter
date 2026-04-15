@@ -4,7 +4,7 @@
 
 Este proyecto esta orientado especificamente a logs de TestComplete exportados en formato JUnit (`summary.xml`).
 
-Genera reportes consolidados de pruebas de automatizacion para multiples productos a partir de esos artefactos.
+Genera reportes consolidados de pruebas de automatizacion para multiples ejecuciones a partir de esos artefactos.
 
 ## Skills del Proyecto
 
