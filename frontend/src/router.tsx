@@ -16,6 +16,10 @@ export const router = createBrowserRouter([
     element: <VersionSelector />,
   },
   {
+    path: '/sources/*',
+    element: <VersionSelector />,
+  },
+  {
     element: <VersionGuard />,
     children: [
       {
