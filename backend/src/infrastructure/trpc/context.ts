@@ -1,11 +1,13 @@
 import type { IncomingMessage } from 'node:http'
 import type { ReportStore } from './reportStore.js'
 import type { GenerateReportDeps } from '../../application/use-cases/index.js'
+import type { ReportSourceDiscovery } from '../../domain/ports/index.js'
 
 /** Contexto disponible en todos los procedimientos tRPC. */
 export interface TrpcContext {
   reportStore: ReportStore;
   generateReportDeps: GenerateReportDeps;
+  reportSourceCatalog: ReportSourceDiscovery;
   /** Origin header del request entrante (usado para validación CORS). */
   origin: string | undefined;
 }
@@ -17,11 +19,13 @@ export interface TrpcContext {
 export function createContextFactory(
   reportStore: ReportStore,
   generateReportDeps: GenerateReportDeps,
+  reportSourceCatalog: ReportSourceDiscovery,
 ) {
   return function createContext({ req }: { req: IncomingMessage }): TrpcContext {
     return {
       reportStore,
       generateReportDeps,
+      reportSourceCatalog,
       origin: req.headers.origin,
     }
   }

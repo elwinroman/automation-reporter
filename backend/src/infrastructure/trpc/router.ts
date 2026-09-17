@@ -1,6 +1,5 @@
 import { router } from './trpc.js'
 import {
-  versions,
   generate,
   globalSummary,
   categories,
@@ -11,12 +10,12 @@ import {
   slowestTests,
   slowestProducts,
   failureAnalysis,
+  sources,
 } from './procedures/index.js'
 
 /** Router principal de la aplicacion. Todos los procedimientos bajo `report.*`. */
 export const appRouter = router({
   report: router({
-    versions,
     generate,
     globalSummary,
     categories,
@@ -27,6 +26,7 @@ export const appRouter = router({
     slowestTests,
     slowestProducts,
     failureAnalysis,
+    sources,
   }),
 })
 
