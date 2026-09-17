@@ -86,28 +86,64 @@ Usa `--host 0.0.0.0` o `pnpm start:server:network` cuando necesites que otras ma
 
 El flujo es:
 
-1. `report.versions`: lista las versiones disponibles en `LOGS_DIRECTORY`.
-2. `report.generate`: parsea los XML de una version especifica y cachea el resultado en memoria.
+1. `report.sources`: lista el arbol de carpetas y fuentes disponibles en `LOGS_DIRECTORY`.
+2. `report.generate`: parsea los XML de una fuente marcada y cachea el resultado en memoria.
 3. `report.*`: consulta, filtra, pagina y ordena sobre el reporte cacheado.
+
+### Servidor local de reportes HTML
+
+En produccion, nginx publica las paginas HTML de TestComplete. Para desarrollo, el proyecto incluye una simulacion con el servidor HTTP estandar de Python; no es necesario instalar nginx ni dependencias de Python adicionales.
+
+Con `LOGS_DIRECTORY` configurado en `backend/.env`, inicia el servidor desde la raiz del repositorio:
+
+```bash
+pnpm --dir frontend nginx-pages:start
+```
+
+El comando crea `.venv` automaticamente si no existe y publica la raiz de logs en `http://127.0.0.1:8082`.
+
+Configura el frontend para generar los enlaces hacia ese servidor:
+
+```env
+VITE_REPORTS_BASE_URL=http://127.0.0.1:8082
+```
+
+Reinicia `pnpm --dir frontend dev` despues de cambiar la variable. Para detener la simulacion:
+
+```bash
+pnpm --dir frontend nginx-pages:stop
+```
+
+Si necesitas servir otra carpeta de logs temporalmente, usa el script tecnico:
+
+```bash
+python scripts/dev/serve_nginx_pages.py --root "D:\ruta\a\logs" --port 8082
+```
+
+La carpeta servida debe ser la raiz que contiene las versiones de reportes, no una version individual. Consulta [la guia completa](docs/reports-dev-server.md) para mas detalles.
 
 ## API tRPC
 
 Todos los endpoints estan bajo el namespace `report.*`.
 
-### Versiones
+### Fuentes
 
 | Endpoint | Input | Output |
 |---|---|---|
-| `report.versions` | - | `Array<{ name: string, cached: boolean, generatedAt: string \| null }>` |
+| `report.sources` | - | `Array<{ path: string, name: string, kind: 'folder' \| 'source', children: Nodo[], cached: boolean, generatedAt: string \| null }>` |
+
+Una carpeta es una fuente seleccionable (`kind: 'source'`) solo cuando contiene directamente el archivo `.automation-reporter-marker`. Las demas son carpetas navegables (`kind: 'folder'`). `path` es el id canonico relativo a `LOGS_DIRECTORY`.
 
 ### Mutation
 
 | Endpoint | Input | Descripcion |
 |---|---|---|
-| `report.generate` | `{ version: string }` | Genera el reporte desde `LOGS_DIRECTORY/{version}` y retorna `{ version, success, generatedAt, summary }` |
+| `report.generate` | `{ version: string }` | Genera el reporte de una fuente marcada y retorna `{ version, success, generatedAt, summary }` |
 
 Validaciones:
-- `version` no puede contener `..`, `/` o `\`
+- `version` es el id canonico de la fuente relativo a `LOGS_DIRECTORY`; admite subcarpetas, por ejemplo `Creditos/Preproduccion`
+- se rechazan rutas absolutas, `..`, `\` y segmentos vacios
+- la carpeta debe contener el marcador `.automation-reporter-marker`
 
 ### Queries
 
@@ -119,17 +155,17 @@ Todas las queries requieren `version: string` y retornan `PRECONDITION_FAILED` s
 | `report.categories` | `category?`, `sortBy?: { field, direction }` |
 | `report.products` | `category?`, `minPassRate?`, `maxPassRate?`, `dateRange?`, `search?`, `pagination?`, `sortBy?` |
 | `report.testCases` | `statusType?: 'flaky'\|'always-passing'\|'always-failing'\|'all'`, `product?`, `minPassRate?`, `maxPassRate?`, `search?`, `pagination?`, `sortBy?` |
-| `report.executions` | `category?`, `product?`, `dateRange?`, `pagination?`, `sortBy?` |
 | `report.productDetail` | `product: string` |
 | `report.flakyTests` | `minPassRate?`, `maxPassRate?`, `minExecutions?`, `pagination?`, `sortBy?` |
-| `report.slowestTests` | `topN?: number`, `metric?: 'avgTime'\|'maxTime'\|'totalTime'` |
-| `report.failureAnalysis` | `minOccurrences?: number`, `product?`, `search?`, `pagination?` |
+| `report.slowestTests` | `topN?: number`, `sortBy?: { field, direction }` |
+| `report.slowestProducts` | `topN?: number`, `sortBy?: { field, direction }` |
+| `report.failureAnalysis` | `search?`, `pagination?` |
 
 ### Ejemplos con curl
 
 ```bash
-# 1. Listar versiones disponibles
-curl http://localhost:3000/report.versions
+# 1. Listar fuentes disponibles
+curl http://localhost:3000/report.sources
 
 # 2. Generar reporte para una version especifica
 curl -X POST http://localhost:3000/report.generate \
@@ -159,7 +195,7 @@ const trpc = createTRPCClient<AppRouter>({
   links: [httpBatchLink({ url: 'http://localhost:3000' })],
 });
 
-const versions = await trpc.report.versions.query();
+const sources = await trpc.report.sources.query();
 
 await trpc.report.generate.mutate({ version: 'v1.0.0' });
 
