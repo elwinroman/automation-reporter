@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import type { MouseEvent } from 'react'
 import { ChevronLeft, ChevronRight, Folder } from 'lucide-react'
 import { ErrorFallback } from '@/components/shared/error-fallback'
+import { TruncatedText } from '@/components/shared/truncated-text'
 import { Skeleton } from '@/components/ui/skeleton'
 
 /** Convierte el segmento splat de la URL en nombres de carpeta decodificados. */
@@ -175,8 +176,8 @@ export default function VersionSelector() {
                   >
                     <CardHeader className="pb-3">
                       <CardTitle className="text-base flex items-center gap-2">
-                        <Folder className="h-4 w-4 text-muted-foreground" />
-                        <span className="truncate">{node.name}</span>
+                        <Folder className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        <TruncatedText text={node.name} className="min-w-0" />
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -200,8 +201,8 @@ export default function VersionSelector() {
                 >
                   <CardHeader className="pb-3">
                     <CardTitle className="text-base flex items-center gap-2">
-                      {node.cached && <CheckCircle className="h-4 w-4 text-[hsl(var(--success))]" />}
-                      <span className="truncate">{node.name}</span>
+                      {node.cached && <CheckCircle className="h-4 w-4 shrink-0 text-[hsl(var(--success))]" />}
+                      <TruncatedText text={node.name} className="min-w-0" />
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
