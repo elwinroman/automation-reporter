@@ -5,6 +5,7 @@ import { createHTTPHandler } from '@trpc/server/adapters/standalone'
 import { appRouter } from './router.js'
 import { createContextFactory } from './context.js'
 import { ReportStore } from './reportStore.js'
+import { FsReportSourceCatalog } from '../adapters/index.js'
 import { env } from '../../core/environment.js'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import type { GenerateReportDeps } from '../../application/use-cases/index.js'
@@ -116,14 +117,15 @@ function applyCorsHeaders(
 export function startServer(options: ServerOptions): void {
   const allowedOrigins = parseAllowedOrigins()
   const reportStore = new ReportStore()
-  const createContext = createContextFactory(reportStore, options.generateReportDeps)
+  const reportSourceCatalog = new FsReportSourceCatalog(env.LOGS_DIRECTORY)
+  const createContext = createContextFactory(reportStore, options.generateReportDeps, reportSourceCatalog)
 
   const trpcHandler = createHTTPHandler({
     router: appRouter,
     createContext,
     responseMeta({ paths }) {
       const headers: Record<string, string> = {}
-      if (paths?.some((p) => p === 'report.versions')) {
+      if (paths?.some((p) => p === 'report.sources')) {
         headers['Cache-Control'] = 'no-store'
       }
       return { headers }

@@ -5,9 +5,10 @@ interface TooltipProps {
   content: React.ReactNode;
   children: React.ReactNode;
   side?: 'top' | 'bottom' | 'left' | 'right';
+  className?: string;
 }
 
-function Tooltip({ content, children, side = 'top' }: TooltipProps) {
+function Tooltip({ content, children, side = 'top', className }: TooltipProps) {
   const [open, setOpen] = React.useState(false)
 
   const positionClasses = {
@@ -19,15 +20,15 @@ function Tooltip({ content, children, side = 'top' }: TooltipProps) {
 
   return (
     <div
-      className="relative inline-flex"
+      className={cn('relative inline-flex', className)}
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
     >
       {children}
-      {open && (
+      {open && content && (
         <div
           className={cn(
-            'absolute z-50 max-w-lg overflow-hidden rounded-md border border-border/60 bg-card px-3.5 py-2.5 text-xs text-card-foreground shadow-lg shadow-black/25 ring-1 ring-white/10 animate-in fade-in-0 zoom-in-95',
+            'absolute z-50 w-max max-w-[min(90vw,48rem)] overflow-hidden rounded-md border border-border/60 bg-card px-3.5 py-2.5 text-xs text-card-foreground shadow-lg shadow-black/25 ring-1 ring-white/10 animate-in fade-in-0 zoom-in-95',
             positionClasses[side],
           )}
         >

@@ -8,7 +8,7 @@ interface CachedReport {
 /**
  * Cache in-memory de reportes generados, indexados por version.
  * Se crea una instancia por servidor y se inyecta via contexto tRPC.
- * Los reportes viven hasta que se limpian o el servidor se reinicia.
+ * Los reportes viven hasta que el servidor se reinicia.
  */
 export class ReportStore {
   private reports = new Map<string, CachedReport>()
@@ -31,20 +31,5 @@ export class ReportStore {
 
   getGeneratedAt(version: string): Date | null {
     return this.reports.get(version)?.generatedAt ?? null
-  }
-
-  getVersions(): Array<{ version: string; generatedAt: Date }> {
-    return [...this.reports.entries()].map(([version, entry]) => ({
-      version,
-      generatedAt: entry.generatedAt,
-    }))
-  }
-
-  clear(version?: string): void {
-    if (version) {
-      this.reports.delete(version)
-    } else {
-      this.reports.clear()
-    }
   }
 }

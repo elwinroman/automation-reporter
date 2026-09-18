@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises'
 import type { XmlFileLocator, XmlParser, ReportExporter } from '../../domain/ports/index.js'
 import type { TestExecution, AggregatedReport } from '../../domain/entities/index.js'
+import { SUPPORTED_REPORT_ARTIFACT_FILENAMES } from '../../domain/constants/index.js'
 import { extractFolderMetadata } from '../utils/FolderMetadataExtractor.js'
 import { assembleReport } from '../utils/ReportAssembler.js'
 
@@ -27,7 +28,7 @@ export async function generateReport(
   const files = await deps.xmlFileLocator.findSummaryFiles(sourceDirectory)
 
   if (files.length === 0) {
-    throw new Error(`No se encontraron archivos summary.xml ni _root.js en: ${sourceDirectory}`)
+    throw new Error(`No se encontraron archivos ${SUPPORTED_REPORT_ARTIFACT_FILENAMES[0]} ni ${SUPPORTED_REPORT_ARTIFACT_FILENAMES[1]} en: ${sourceDirectory}`)
   }
 
   console.log(`Encontradas ${files.length} fuentes de reporte`)
